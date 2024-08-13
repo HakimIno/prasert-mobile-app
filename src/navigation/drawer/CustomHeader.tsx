@@ -35,11 +35,11 @@ const CustomHeader = ({ navigation }) => {
                 <TouchableOpacity
                     //@ts-ignore
                     ref={buttonRef}
-                    style={[styles.icon, { backgroundColor: color.blue[950] }]}
+                    style={[styles.icon, { backgroundColor: color.blue[600] }]}
                     onPress={showMenu}
                 >
                     <Text style={{ color: "white" }}>
-                        b
+                        N
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -53,9 +53,9 @@ const CustomHeader = ({ navigation }) => {
             >
                 <TouchableOpacity style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
                     <View style={[styles.menuContainer, { top: "10%", right: "10%" }]}>
-                        <View style={[styles.menuItem, { flexDirection: 'row', gap: 20, alignItems: 'center' }]}>
-                            <Ionicons name="person" size={24} color="black" />
-                            <Text >{user?.email}</Text>
+                        <View style={[styles.menuItem, { flexDirection: 'row', gap: 10, alignItems: 'center' }]}>
+                            <Ionicons name="person" size={20} color={color.gray[800]} />
+                            <Text numberOfLines={1} style={{ fontFamily: 'SukhumvitSet-Bold' }}>{user?.email}</Text>
                         </View>
                         <TouchableOpacity style={[styles.menuItem, { borderTopWidth: 0.2, borderColor: color.gray[300] }]} onPress={handleLogout}>
                             <Text style={[styles.menuText, { color: color.rose[600], fontWeight: '600' }]}>ออกจากระบบ</Text>
@@ -108,14 +108,15 @@ const styles = StyleSheet.create({
     },
     menuItem: {
         flex: 1,
-        paddingVertical: 13,
+        paddingVertical: 10,
         paddingHorizontal: 20,
         alignItems: 'center',
         width: '100%',
     },
     menuText: {
-        fontSize: 16,
+        fontSize: 15,
         color: 'black',
+        fontFamily: 'SukhumvitSet-Bold'
     },
 });
 

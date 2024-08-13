@@ -4,10 +4,10 @@
     "slug": "prasert-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logoApp.png",
+    "icon": "./assets/appLogo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/appLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#0C1E2A"
     },
@@ -17,13 +17,23 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logoApp.png",
+        "foregroundImage": "./assets/appLogo.png",
         "backgroundColor": "#0C1E2A"
       },
-      "package": "com.kimsnow33.prasertmobileapp"
+      "package": "com.kimsnow33.prasertmobileapp",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "500f1a50-0248-4356-a617-5d9117617500"
+      }
+    },
+    "owner": "kimsnow33"
   }
 }

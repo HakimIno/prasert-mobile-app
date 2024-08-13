@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert } from 'react-native';
+import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import color from '../../../constant/color';
@@ -8,7 +8,8 @@ import { useFetchIcons } from '../../../hooks/useFetchIcons';
 import { useFetchFiles } from '../../../hooks/useFetchFile';
 import dayjs from 'dayjs';
 import * as FileSystem from 'expo-file-system';
-import * as Permissions from 'expo-permissions';
+import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../../context/AuthContext';
 
 const HomeScreen = () => {
@@ -56,40 +57,34 @@ const HomeScreen = () => {
         // Logic สำหรับดูรายละเอียด
     };
 
-    const handleDownload = async () => {
-        const hasPermission = await requestPermissions();
-        if (!hasPermission) {
-            return; // หยุดการทำงานถ้าไม่ได้รับสิทธิ์
-        }
+    const [isLoading, setIsLoading] = useState(false);
 
+    const handleDownload = async () => {
+        setIsLoading(true); // เริ่มแสดง loading
         const accessToken = session?.access_token;
         const refreshToken = session?.refresh_token;
 
         if (accessToken && refreshToken) {
-            await downloadFile(fileId, accessToken, refreshToken);
+            const uri = await downloadFile(fileId, accessToken, refreshToken, fileName);
+            if (uri) {
+                openFile(uri);
+            }
         } else {
             console.log('Tokens are not available');
         }
+        setIsLoading(false); // หยุดแสดง loading
     };
 
-    const requestPermissions = async () => {
-        const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
-        if (status !== 'granted') {
-            Alert.alert('Permission to access media library is required!');
-            return false;
-        }
-        return true;
-    };
 
-    const downloadFile = async (fileIdx, accessToken, refreshToken) => {
+    const downloadFile = async (fileIdx: string, accessToken: string, refreshToken: string, file_name: string) => {
         try {
             const apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
-            const fileUri = FileSystem.documentDirectory + fileName;
+            const fileUri = FileSystem.documentDirectory + file_name;
 
             const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-                    'x-refresh-token': refreshToken, // ส่ง refresh token ใน header
+                    'x-refresh-token': refreshToken,
                 },
             });
 
@@ -101,6 +96,14 @@ const HomeScreen = () => {
             return response.uri;
         } catch (error) {
             Alert.alert('Download failed', error.message);
+        }
+    };
+
+    const openFile = async (fileUri: string) => {
+        if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(fileUri);
+        } else {
+            Alert.alert('Error', 'Sharing is not available on this device');
         }
     };
 
@@ -182,13 +185,19 @@ const HomeScreen = () => {
                     <View style={styles.modalOverlay} />
                 </TouchableWithoutFeedback>
                 <View style={[styles.menuContainer, { top: menuPosition.top, left: menuPosition.left }]}>
-                    <TouchableOpacity onPress={handleViewDetails} style={styles.menuItem}>
-                        <Ionicons name="information-circle" size={24} color={color.gray[800]} />
-                        <Text style={styles.menuText}>รายละเอียด</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleDownload} style={[styles.menuItem, { borderTopWidth: 0.3, }]}>
-                        <Ionicons name="download" size={24} color={color.gray[800]} />
-                        <Text style={styles.menuText}>Download</Text>
+                    <TouchableOpacity onPress={handleDownload} style={[styles.menuItem]}>
+                        {isLoading ? (
+                            <>
+                                <ActivityIndicator size={"small"} color={color.blue[600]} />
+                                <Text style={styles.menuText}>{"กำลังโหลด..."}</Text>
+                            </>
+                        ) : (
+                            <>
+                                <Ionicons name="download" size={26} color={color.gray[800]} />
+                                <Text style={styles.menuText}>{"ดาวน์โหลด"}</Text>
+                            </>
+                        )}
+
                     </TouchableOpacity>
                 </View>
             </Modal>
@@ -288,14 +297,13 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     menuItem: {
-        paddingVertical: 10,
+        paddingVertical: 5,
+        alignItems: 'center',
         flexDirection: 'row',
         width: 150,
         gap: 15,
-        borderColor: color.gray[300]
     },
     menuText: {
-        fontSize: 14,
-        fontFamily: 'SukhumvitSet-SemiBold',
+        fontFamily: 'SukhumvitSet-Bold',
     },
 });

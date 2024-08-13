@@ -1,39 +1,33 @@
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import color from '../../../constant/color';
-import { supabase } from '../../../utils/supabase';
 import { useAuth } from '../../../context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
 
 const LoginScreen = ({ navigation }) => {
-    const { signUp, signIn } = useAuth();
+    const { signIn } = useAuth();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-
-    const handleSignUp = async () => {
-        try {
-            await signUp(email, password);
-            Alert.alert('Success', 'Please check your email for confirmation.');
-        } catch (error) {
-            Alert.alert('Error', (error as Error).message);
-        }
-    };
+    const [loading, setLoading] = useState<boolean>(false);
 
     const handleSignIn = async () => {
+        setLoading(true); // เริ่มการโหลด
         try {
             await signIn(email, password);
-            Alert.alert('Success', 'You are logged in!');
         } catch (error) {
             Alert.alert('Error', (error as Error).message);
+        } finally {
+            setLoading(false); // จบการโหลด
         }
     };
+
     return (
         <View style={styles.container}>
             <StatusBar style="auto" />
             <View style={[styles.container, { marginHorizontal: 20, flex: 1, justifyContent: 'center', alignItems: 'center', gap: 36 }]}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Image
-                        source={require("../../../../assets/logoApp.png")}
+                        source={require("../../../../assets/logo.jpg")}
                         style={{ width: 120, height: 120, borderRadius: 120, marginBottom: 20, }}
                     />
 
@@ -59,13 +53,18 @@ const LoginScreen = ({ navigation }) => {
                         placeholderTextColor={'#a1a1aa'}
                         value={password}
                         onChangeText={setPassword}
-
                     />
 
-                    <Pressable style={styles.btnContainer}
+                    <Pressable
+                        style={styles.btnContainer}
                         onPress={handleSignIn}
+                        disabled={loading} // ปิดการใช้งานปุ่มเมื่อกำลังโหลด
                     >
-                        <Text style={[styles.textInfoSubTitle, { color: color.white, fontFamily: 'SukhumvitSet-Bold' }]}>เข้าสู่ระบบ</Text>
+                        {loading ? (
+                            <ActivityIndicator color={color.white} />
+                        ) : (
+                            <Text style={[styles.textInfoSubTitle, { color: color.white, fontFamily: 'SukhumvitSet-Bold' }]}>เข้าสู่ระบบ</Text>
+                        )}
                     </Pressable>
 
                     <View style={{ flexDirection: 'row', gap: 3, justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>

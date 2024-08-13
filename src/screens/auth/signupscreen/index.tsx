@@ -1,7 +1,6 @@
-import { Alert, Pressable, StyleSheet, Text, TextInput, View, Linking } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View, Linking, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { supabase } from '../../../utils/supabase';
-import debounce from 'lodash/debounce';
 import color from '../../../constant/color';
 
 const SignupScreen = () => {
@@ -66,7 +65,6 @@ const SignupScreen = () => {
         }
     };
 
-    const handleSignUpDebounced = debounce(handleSignUp, 1000);
 
     const renderInput = (label: string, name: string, placeholder: string, secureTextEntry = false, keyboardType: 'default' | 'email-address' = 'default') => (
         <View>
@@ -86,17 +84,26 @@ const SignupScreen = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.formContainer}>
-                {renderInput('ชื่อ', 'firstName', 'First Name')}
-                {renderInput('นามสกุล', 'lastName', 'Last Name')}
-                {renderInput('อีเมล', 'email', 'Email', false, 'email-address')}
-                {renderInput('เบอร์โทรศัพท์', 'phone', 'Phone Number')}
-                {renderInput('รหัสผ่าน', 'password', 'Password', true)}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                    <View style={{ margin: 20 }}>
+                        <View style={styles.formContainer}>
+                            {renderInput('ชื่อ', 'firstName', 'First Name')}
+                            {renderInput('นามสกุล', 'lastName', 'Last Name')}
+                            {renderInput('อีเมล', 'email', 'Email', false, 'email-address')}
+                            {renderInput('เบอร์โทรศัพท์', 'phone', 'Phone Number')}
+                            {renderInput('รหัสผ่าน', 'password', 'Password', true)}
 
-                <Pressable style={styles.btnContainer} onPress={handleSignUpDebounced}>
-                    <Text style={styles.btnText}>ลงทะเบียน</Text>
-                </Pressable>
-            </View>
+                            <Pressable style={styles.btnContainer} onPress={handleSignUp}>
+                                <Text style={styles.btnText}>ลงทะเบียน</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </View>
     );
 };
@@ -106,9 +113,7 @@ export default SignupScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        margin: 20,
-        backgroundColor: color.slate[100]
+        backgroundColor: color.slate[50]
     },
     formContainer: {
         width: "100%",
