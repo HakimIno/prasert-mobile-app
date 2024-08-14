@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 
 export const useFetchIcons = () => {
-    const [dataIcon, setDataIcon] = useState<{ icon_url: string; type: string; abbreviation: string }[]>([]);
+    const [dataIcon, setDataIcon] = useState<{ id: number, icon_url: string; type: string; abbreviation: string }[]>([]);
 
     const fetchIcons = async () => {
         const { data, error } = await supabase

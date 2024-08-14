@@ -3,6 +3,7 @@ import AppStackNavigation from './src/navigation';
 import { AuthProvider } from './src/context/AuthContext';
 import { useFonts } from 'expo-font';
 import { Text, View } from 'react-native';
+import { FilesProvider } from './src/context/FilesComtext';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -22,7 +23,9 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <AppStackNavigation />
+      <FilesProvider>
+        <AppStackNavigation />
+      </FilesProvider>
     </AuthProvider>
   );
 }

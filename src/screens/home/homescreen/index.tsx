@@ -5,32 +5,32 @@ import { Ionicons } from '@expo/vector-icons';
 import color from '../../../constant/color';
 import { FlashList } from '@shopify/flash-list';
 import { useFetchIcons } from '../../../hooks/useFetchIcons';
-import { useFetchFiles } from '../../../hooks/useFetchFile';
 import dayjs from 'dayjs';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../../context/AuthContext';
+import { useFiles } from '../../../context/FilesComtext';
 
 const HomeScreen = () => {
-    const [selectedFilter, setSelectedFilter] = useState("ทั้งหมด");
+    const [selectedFilter, setSelectedFilter] = useState(0);
     const { session } = useAuth();
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-    const [selectedItem, setSelectedItem] = useState(null);
     const [fileId, setFileId] = useState("")
     const [fileName, setfileName] = useState("")
 
     const dataIcon = useFetchIcons();
-    const { files, loading } = useFetchFiles();
 
-    const dataWithAllTab = [{ abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
+
+    const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
     // ฟังก์ชันกรองข้อมูล
-    const filteredFiles = selectedFilter === "ทั้งหมด"
+    const { files, loading } = useFiles();
+    const filteredFiles = selectedFilter === 0
         ? files
-        : files.filter((folder: { filename: string; }) => folder.filename.endsWith(`.${selectedFilter}`))
+        : files.filter((folder: any) => folder.icon.id === selectedFilter)
 
 
     const handleOpenMenu = (item, event) => {
@@ -48,13 +48,7 @@ const HomeScreen = () => {
         }
 
         setMenuPosition({ top: pageY, left: leftPosition });
-        setSelectedItem(item);
         setMenuVisible(true);
-    };
-
-    const handleViewDetails = () => {
-        setMenuVisible(false);
-        // Logic สำหรับดูรายละเอียด
     };
 
     const [isLoading, setIsLoading] = useState(false);
@@ -122,24 +116,26 @@ const HomeScreen = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.tab,
-                                    item?.abbreviation === selectedFilter && styles.selectedTab
+                                    item?.id === selectedFilter && styles.selectedTab
                                 ]}
-                                onPress={() => setSelectedFilter(item?.abbreviation)}
+                                onPress={() => setSelectedFilter(item?.id)}
                             >
                                 <Image source={{ uri: item?.icon_url }} style={styles.tabIcon} />
                                 <Text style={[
                                     styles.tabText,
-                                    item?.abbreviation === selectedFilter && styles.selectedTabText
+                                    item?.id === selectedFilter && styles.selectedTabText
                                 ]}>
-                                    {item?.abbreviation}
+                                    {item?.abbreviation.toLocaleUpperCase()}
                                 </Text>
                             </TouchableOpacity>
                         )}
                     />
                 </View>
+
                 <FlashList
                     showsVerticalScrollIndicator={false}
                     overScrollMode="never"
+                    keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.listItem}>
                             <View style={styles.listItemContent}>
@@ -158,7 +154,6 @@ const HomeScreen = () => {
                                 </View>
                             </View>
                             <TouchableOpacity
-
                                 onPress={(event) => {
                                     //@ts-ignore
                                     setFileId(item?.file_id)
@@ -170,8 +165,8 @@ const HomeScreen = () => {
                             </TouchableOpacity>
                         </View>
                     )}
-                    estimatedItemSize={50}
-                    data={filteredFiles} // ใช้ข้อมูลที่ถูกกรองแล้ว
+                    estimatedItemSize={200}
+                    data={filteredFiles}
                 />
             </View>
 
@@ -188,12 +183,12 @@ const HomeScreen = () => {
                     <TouchableOpacity onPress={handleDownload} style={[styles.menuItem]}>
                         {isLoading ? (
                             <>
-                                <ActivityIndicator size={"small"} color={color.blue[600]} />
+                                <ActivityIndicator size={24} color={color.blue[600]} />
                                 <Text style={styles.menuText}>{"กำลังโหลด..."}</Text>
                             </>
                         ) : (
                             <>
-                                <Ionicons name="download" size={26} color={color.gray[800]} />
+                                <Ionicons name="download-outline" size={24} color={color.gray[950]} />
                                 <Text style={styles.menuText}>{"ดาวน์โหลด"}</Text>
                             </>
                         )}
@@ -222,14 +217,14 @@ const styles = StyleSheet.create({
         padding: 5,
         paddingHorizontal: 15,
         marginEnd: 15,
-        borderRadius: 13,
+        borderRadius: 100,
         backgroundColor: color.zinc[100],
         flexDirection: 'row',
         gap: 5,
         alignItems: 'center',
     },
     selectedTab: {
-        backgroundColor: color.blue[100],
+        backgroundColor: color.blue[50],
         borderWidth: 1.5,
         borderColor: color.blue[600]
     },
@@ -300,10 +295,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         alignItems: 'center',
         flexDirection: 'row',
-        width: 150,
+        width: 140,
         gap: 15,
     },
     menuText: {
-        fontFamily: 'SukhumvitSet-Bold',
+        fontFamily: 'SukhumvitSet-SemiBold',
     },
 });

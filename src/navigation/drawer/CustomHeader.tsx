@@ -5,13 +5,15 @@ import color from '../../constant/color';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { useFiles } from '../../context/FilesComtext';
 
 const CustomHeader = ({ navigation }) => {
     const { top } = useSafeAreaInsets();
     const [isMenuVisible, setMenuVisible] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const { user, signOut } = useAuth(); // ใช้ข้อมูลจาก AuthContext
     const buttonRef = useRef<View>(null); // สร้าง ref สำหรับปุ่ม 'b'
+
+    const { searchQuery, setSearchQuery } = useFiles()
 
     const handleLogout = async () => {
         await signOut();
@@ -19,10 +21,7 @@ const CustomHeader = ({ navigation }) => {
     };
 
     const showMenu = () => {
-        buttonRef.current?.measure((fx, fy, width, height, px, py) => {
-            setMenuPosition({ top: py + height, left: px });
-            setMenuVisible(true);
-        });
+        setMenuVisible(true);
     };
 
     return (
@@ -31,6 +30,8 @@ const CustomHeader = ({ navigation }) => {
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search"
+                    value={searchQuery}
+                    onChangeText={(text) => setSearchQuery(text)} // จับค่าที่พิมพ์แล้วเก็บใน searchQuery
                 />
                 <TouchableOpacity
                     //@ts-ignore
@@ -39,7 +40,7 @@ const CustomHeader = ({ navigation }) => {
                     onPress={showMenu}
                 >
                     <Text style={{ color: "white" }}>
-                        N
+                        {user?.email?.charAt(0).toLocaleUpperCase()}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         alignItems: 'center',
-        width: "65%"
+        width: "60%"
     },
     menuItem: {
         flex: 1,
