@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, TextInput, View, Linking, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View, Linking, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { supabase } from '../../../utils/supabase';
 import color from '../../../constant/color';
@@ -12,6 +12,8 @@ const SignupScreen = () => {
         phone: '',
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (name: string, value: string) => {
         setFormData({ ...formData, [name]: value });
     };
@@ -21,6 +23,7 @@ const SignupScreen = () => {
     };
 
     const handleSignUp = async () => {
+        setLoading(true);
         const { email, password, firstName, lastName, phone } = formData;
         try {
             const { data, error } = await signUp(email, password);
@@ -52,7 +55,7 @@ const SignupScreen = () => {
                 [
                     {
                         text: 'Open Gmail',
-                        onPress: () => Linking.openURL('mailto:'),
+                        onPress: () => Linking.openURL('googlegmail://co'),
                     },
                     {
                         text: 'OK',
@@ -60,8 +63,19 @@ const SignupScreen = () => {
                     },
                 ]
             );
+
+            setFormData({
+                email: '',
+                password: '',
+                firstName: '',
+                lastName: '',
+                phone: '',
+            });
+
         } catch (error) {
             Alert.alert('Error', (error as Error).message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -97,8 +111,12 @@ const SignupScreen = () => {
                             {renderInput('เบอร์โทรศัพท์', 'phone', 'Phone Number')}
                             {renderInput('รหัสผ่าน', 'password', 'Password', true)}
 
-                            <Pressable style={styles.btnContainer} onPress={handleSignUp}>
-                                <Text style={styles.btnText}>ลงทะเบียน</Text>
+                            <Pressable style={styles.btnContainer} onPress={handleSignUp} disabled={loading}>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color={color.white} />
+                                ) : (
+                                    <Text style={styles.btnText}>ลงทะเบียน</Text>
+                                )}
                             </Pressable>
                         </View>
                     </View>
