@@ -2,7 +2,7 @@
   "expo": {
     "name": "prasert-mobile-app",
     "slug": "prasert-mobile-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/appLogo.png",
     "userInterfaceStyle": "light",
