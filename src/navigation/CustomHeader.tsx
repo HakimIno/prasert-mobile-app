@@ -1,19 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Platform, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import color from '../../constant/color';
-import { useAuth } from '../../context/AuthContext';
+import color from '../constant/color';
+import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useFiles } from '../../context/FilesComtext';
+import { useFiles } from '../context/FilesComtext';
 
-const CustomHeader = ({ navigation }) => {
+const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undefined }) => {
     const { top } = useSafeAreaInsets();
     const [isMenuVisible, setMenuVisible] = useState(false);
     const { user, signOut } = useAuth(); // ใช้ข้อมูลจาก AuthContext
     const buttonRef = useRef<View>(null); // สร้าง ref สำหรับปุ่ม 'b'
-
-    const { searchQuery, setSearchQuery } = useFiles()
 
     const handleLogout = async () => {
         await signOut();
@@ -27,12 +25,16 @@ const CustomHeader = ({ navigation }) => {
     return (
         <View style={[styles.header]}>
             <View style={[{ marginTop: Platform.OS === "ios" ? top - 5 : top + 5 }, styles.subHeader]}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChangeText={(text) => setSearchQuery(text)} // จับค่าที่พิมพ์แล้วเก็บใน searchQuery
-                />
+                {isShow && (
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search"
+                        value={searchQuery}
+                        onChangeText={(text) => setSearchQuery(text)} // จับค่าที่พิมพ์แล้วเก็บใน searchQuery
+                        placeholderTextColor={color.black}
+                    />
+                )}
+                <View />
                 <TouchableOpacity
                     //@ts-ignore
                     ref={buttonRef}
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
     subHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 7,
+        padding: 8,
         justifyContent: 'space-between',
         marginHorizontal: 20,
         backgroundColor: color.blue[50],

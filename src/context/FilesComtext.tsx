@@ -14,6 +14,7 @@ type FilesContextType = {
     loading: boolean;
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    fetchFilesWithIcons: (branchId?: number, typeCarsId?: number) => Promise<void>;
 };
 
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
@@ -24,26 +25,35 @@ export const FilesProvider = ({ children }) => {
     const [cachedFiles, setCachedFiles] = useState<File[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
 
-    const fetchFilesWithIcons = async () => {
+    const fetchFilesWithIcons = async (branchId?: number, typeCarsId?: number) => {
         setLoading(true);
 
         let query = supabase
             .from('files')
             .select(`
+            id,
+            file_id,
+            filename,
+            creationdate,
+            owner,
+            icon (
                 id,
-                file_id,
-                filename,
-                creationdate,
-                owner,
-                icon (
-                    id,
-                    icon_url
-                ),
-                branchs (
-                    id,
-                    branch_name
-                )
-            `).order('creationdate', { ascending: false });
+                icon_url
+            ),
+            branch_id,  
+            type_car_id, 
+            branchs:branch_id (branch_name),
+            type_cars:type_car_id (car_type_name)
+        `)
+            .order('creationdate', { ascending: false });
+
+        // กรองข้อมูลตาม branch และ type_cars
+        if (branchId) {
+            query = query.eq('branch_id', branchId);  // ใช้ branch_id ที่อยู่ในตาราง files โดยตรง
+        }
+        if (typeCarsId) {
+            query = query.eq('type_car_id', typeCarsId);  // ใช้ type_car_id ที่อยู่ในตาราง files โดยตรง
+        }
 
         const { data, error } = await query;
 
@@ -95,17 +105,21 @@ export const FilesProvider = ({ children }) => {
     }, [searchQuery, cachedFiles]);
 
     return (
-        <FilesContext.Provider value={{ files, loading, searchQuery, setSearchQuery }
-        }>
+        <FilesContext.Provider value={{ files, loading, searchQuery, setSearchQuery, fetchFilesWithIcons }}>
             {children}
         </FilesContext.Provider>
     );
 };
 
-export const useFiles = () => {
+export const useFiles = ({ branch, type_cars }) => {
     const context = useContext(FilesContext);
     if (context === undefined) {
         throw new Error('useFiles must be used within a FilesProvider');
     }
+
+    useEffect(() => {
+        context.fetchFilesWithIcons(branch?.id, type_cars?.id);
+    }, [branch, type_cars]);
+
     return context;
 };

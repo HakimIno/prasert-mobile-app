@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator } from 'react-native';
+import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import color from '../../../constant/color';
 import { FlashList } from '@shopify/flash-list';
 import { useFetchIcons } from '../../../hooks/useFetchIcons';
@@ -11,8 +11,11 @@ import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../../context/AuthContext';
 import { useFiles } from '../../../context/FilesComtext';
+import CustomHeader from '../../../navigation/CustomHeader';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation, route }) => {
+    const { branch, type_cars } = route.params;
+
     const [selectedFilter, setSelectedFilter] = useState(0);
     const { session } = useAuth();
 
@@ -27,10 +30,12 @@ const HomeScreen = () => {
     const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
     // ฟังก์ชันกรองข้อมูล
-    const { files, loading } = useFiles();
+    const { files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
     const filteredFiles = selectedFilter === 0
         ? files
         : files.filter((folder: any) => folder.icon.id === selectedFilter)
+
+
 
 
     const handleOpenMenu = (item, event) => {
@@ -104,6 +109,27 @@ const HomeScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
+            <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
+                <Pressable
+                    onPress={() => navigation.goBack()}
+                    style={[styles.button, styles.firstButton]}>
+                    <AntDesign name="home" size={18} color={color.blue[600]} />
+                    <Text style={styles.buttonText}>หน้าแรก</Text>
+                </Pressable>
+                <Ionicons name="chevron-forward" size={16} color={color.blue[600]} />
+                <Pressable
+                    onPress={() => navigation.goBack()}
+                    style={styles.button}>
+                    <Text style={styles.buttonText}>{branch?.branch_name}</Text>
+                </Pressable>
+                <Ionicons name="chevron-forward" size={16} color={color.blue[600]} />
+                <Pressable
+                    onPress={() => { }}
+                    style={[styles.button, { backgroundColor: color.blue[600] }]}>
+                    <Text style={[styles.buttonText, { color: color.white }]}>{type_cars?.car_type_name}</Text>
+                </Pressable>
+            </View>
             <View style={{ flex: 1, marginHorizontal: 8 }}>
                 <View style={styles.tabContainer}>
                     <FlatList
@@ -132,42 +158,63 @@ const HomeScreen = () => {
                     />
                 </View>
 
-                <FlashList
-                    showsVerticalScrollIndicator={false}
-                    overScrollMode="never"
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.listItem}>
-                            <View style={styles.listItemContent}>
-                                {/* @ts-ignore */}
-                                <Image source={{ uri: item?.icon?.icon_url }} style={styles.listItemIcon} />
-                                <View style={styles.listItemTextContainer}>
-                                    <Text style={styles.listItemTitle} numberOfLines={1}>
-                                        {item.filename}
-                                    </Text>
-                                    <View style={styles.listItemSubtextContainer}>
-                                        <Ionicons name="people" size={16} color={color.zinc[400]} />
-                                        <Text style={styles.listItemSubtext} numberOfLines={1}>
-                                            {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
-                                        </Text>
+                {loading ? (
+                    <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', marginTop: 20, gap: 5 }}>
+                        <ActivityIndicator size={30} color={color.blue[600]} />
+                        <Text style={styles.menuText}>กำลังโหลด...</Text>
+                    </View>
+                ) : (
+                    <>
+                        {filteredFiles.length > 0 ? (
+                            <FlashList
+                                showsVerticalScrollIndicator={false}
+                                overScrollMode="never"
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({ item }) => (
+                                    <View style={styles.listItem}>
+                                        <View style={styles.listItemContent}>
+                                            {/* @ts-ignore */}
+                                            <Image source={{ uri: item?.icon?.icon_url }} style={styles.listItemIcon} />
+                                            <View style={styles.listItemTextContainer}>
+                                                <Text style={styles.listItemTitle} numberOfLines={1}>
+                                                    {item.filename}
+                                                </Text>
+                                                <View style={styles.listItemSubtextContainer}>
+                                                    <Ionicons name="people" size={16} color={color.zinc[400]} />
+                                                    <Text style={styles.listItemSubtext} numberOfLines={1}>
+                                                        {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={(event) => {
+                                                //@ts-ignore
+                                                setFileId(item?.file_id)
+                                                setfileName(item?.filename)
+                                                handleOpenMenu(item, event)
+                                            }}
+                                            style={styles.listItemAction}>
+                                            <Ionicons name="ellipsis-vertical" size={20} color="black" />
+                                        </TouchableOpacity>
                                     </View>
+                                )}
+                                estimatedItemSize={200}
+                                data={filteredFiles}
+                            />
+                        ) : (
+                            <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
+                                <View style={{ gap: 5 }}>
+                                    <Image
+                                        source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/forbidden.png" }}
+                                        style={{ width: 60, height: 60, marginLeft: 8 }} />
+                                    <Text style={[styles.menuText, { color: color.gray[800] }]}>ไม่พบไฟล์</Text>
                                 </View>
+                                <View />
                             </View>
-                            <TouchableOpacity
-                                onPress={(event) => {
-                                    //@ts-ignore
-                                    setFileId(item?.file_id)
-                                    setfileName(item?.filename)
-                                    handleOpenMenu(item, event)
-                                }}
-                                style={styles.listItemAction}>
-                                <Ionicons name="ellipsis-vertical" size={20} color="black" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    estimatedItemSize={200}
-                    data={filteredFiles}
-                />
+                        )}
+                    </>
+                )}
             </View>
 
             <Modal
@@ -214,9 +261,9 @@ const styles = StyleSheet.create({
         padding: 10
     },
     tab: {
-        padding: 5,
+        padding: 3,
         paddingHorizontal: 15,
-        marginEnd: 15,
+        marginEnd: 10,
         borderRadius: 100,
         backgroundColor: color.zinc[100],
         flexDirection: 'row',
@@ -300,5 +347,22 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontFamily: 'SukhumvitSet-SemiBold',
+    },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 2,
+        paddingHorizontal: 10,
+        backgroundColor: color.blue[50],
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    firstButton: {
+        marginRight: 0,
+    },
+    buttonText: {
+        color: color.blue[600],
+        fontFamily: 'SukhumvitSet-SemiBold',
+        marginLeft: 0,
     },
 });
