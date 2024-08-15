@@ -7,11 +7,34 @@ import TypeCarsScreen from '../screens/home/type_cars';
 import HomeScreen from '../screens/home/homescreen';
 import LoginScreen from '../screens/auth/loginscreen';
 import SignupScreen from '../screens/auth/signupscreen';
+import { ActivityIndicator, Text, View } from 'react-native';
+import color from '../constant/color';
+import { StatusBar } from 'expo-status-bar';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-    const { user } = useAuth(); // assuming useAuth provides user state
+    const { user, isLoading } = useAuth(); // assuming useAuth provides user state
+
+    if (isLoading) {
+        // Show a loading screen while the user state is being fetched
+        return (
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: color.zinc[50],
+                gap: 20
+            }}>
+                <StatusBar style='auto' />
+                <ActivityIndicator color={color.blue[600]} size="large" />
+                <Text style={{
+                    fontFamily: 'SukhumvitSet-SemiBold',
+                    fontSize: 14,
+                }}>กำลังโหลด...</Text>
+            </View>
+        );
+    }
 
     return (
         <NavigationContainer>

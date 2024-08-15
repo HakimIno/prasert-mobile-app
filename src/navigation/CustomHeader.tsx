@@ -4,8 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import color from '../constant/color';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
-import { useFiles } from '../context/FilesComtext';
+
 
 const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undefined }) => {
     const { top } = useSafeAreaInsets();
@@ -28,10 +27,10 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
                 {isShow && (
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search"
+                        placeholder="ค้นหาชื่อไฟล์"
                         value={searchQuery}
                         onChangeText={(text) => setSearchQuery(text)} // จับค่าที่พิมพ์แล้วเก็บใน searchQuery
-                        placeholderTextColor={color.black}
+                        placeholderTextColor={color.zinc[500]}
                     />
                 )}
                 <View />
@@ -96,7 +95,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginRight: 10,
         width: "70%",
-        fontFamily: 'SukhumvitSet-Bold'
+        fontFamily: 'SukhumvitSet-SemiBold'
     },
     modalOverlay: {
         flex: 1,

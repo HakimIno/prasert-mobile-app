@@ -12,10 +12,10 @@ import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../../context/AuthContext';
 import { useFiles } from '../../../context/FilesComtext';
 import CustomHeader from '../../../navigation/CustomHeader';
+import LoadingIndicator from '../../../components/LoadingIndicator';
 
 const HomeScreen = ({ navigation, route }) => {
     const { branch, type_cars } = route.params;
-
     const [selectedFilter, setSelectedFilter] = useState(0);
     const { session } = useAuth();
 
@@ -26,16 +26,13 @@ const HomeScreen = ({ navigation, route }) => {
 
     const dataIcon = useFetchIcons();
 
-
     const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
     // ฟังก์ชันกรองข้อมูล
-    const { files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
+    const { filteredFiles: files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
     const filteredFiles = selectedFilter === 0
         ? files
         : files.filter((folder: any) => folder.icon.id === selectedFilter)
-
-
 
 
     const handleOpenMenu = (item, event) => {
@@ -159,10 +156,7 @@ const HomeScreen = ({ navigation, route }) => {
                 </View>
 
                 {loading ? (
-                    <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', marginTop: 20, gap: 5 }}>
-                        <ActivityIndicator size={30} color={color.blue[600]} />
-                        <Text style={styles.menuText}>กำลังโหลด...</Text>
-                    </View>
+                    <LoadingIndicator message="กำลังโหลด..." />
                 ) : (
                     <>
                         {filteredFiles.length > 0 ? (

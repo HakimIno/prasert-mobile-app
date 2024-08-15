@@ -1,19 +1,43 @@
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { FlashList } from '@shopify/flash-list'
 import color from '../../../constant/color'
 import { useFetchBranchs } from '../../../hooks/useFetchBranchs'
 import CustomHeader from '../../../navigation/CustomHeader'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { useFiles } from '../../../context/FilesComtext'
+import { useFocusEffect } from '@react-navigation/native'
 
 const FolderScreen = ({ navigation }) => {
-    const folders = useFetchBranchs()
+    const folders = useFetchBranchs();
+    const { filteredFiles, loading, searchQuery, setSearchQuery, fetchFilesWithIcons } = useFiles({ branch: null, type_cars: null });
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setSearchQuery('');
+            fetchFilesWithIcons();
+            return () => { };
+        }, [setSearchQuery])
+    );
+
+    const filteredFolders = useMemo(() => {
+        if (!searchQuery) return folders;
+
+        return folders.filter(folder =>
+            filteredFiles.some(file => file.branch_id === folder.id)
+        );
+    }, [folders, filteredFiles, searchQuery]);
+
+    const handlePress = (item: any) => {
+        navigation.navigate("TypeCars", { branch: item });
+    };
+
 
     return (
         <View style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
-            <CustomHeader />
+            <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
                 <Pressable
                     onPress={() => { }}
@@ -28,7 +52,7 @@ const FolderScreen = ({ navigation }) => {
                     overScrollMode="never"
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate("TypeCars", { branch: item })}>
+                        <TouchableOpacity style={styles.listItem} onPress={() => handlePress(item)}>
                             <View style={styles.listItemContent}>
                                 {/* @ts-ignore */}
                                 <Image source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/folder.png" }} style={styles.listItemIcon} />
@@ -42,7 +66,7 @@ const FolderScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     )}
                     estimatedItemSize={200}
-                    data={folders}
+                    data={filteredFolders}
                 />
             </View>
 

@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 
 type File = {
+    branchs: any;
+    type_cars: any;
+    branch_id: number;
     id: number;
     filename: string;
     creationdate: string;
@@ -10,7 +13,7 @@ type File = {
 };
 
 type FilesContextType = {
-    files: File[];
+    filteredFiles: File[];
     loading: boolean;
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -20,7 +23,7 @@ type FilesContextType = {
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
 
 export const FilesProvider = ({ children }) => {
-    const [files, setFiles] = useState<File[]>([]);
+    const [filteredFiles, setFilteredFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [cachedFiles, setCachedFiles] = useState<File[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -49,10 +52,10 @@ export const FilesProvider = ({ children }) => {
 
         // กรองข้อมูลตาม branch และ type_cars
         if (branchId) {
-            query = query.eq('branch_id', branchId);  // ใช้ branch_id ที่อยู่ในตาราง files โดยตรง
+            query = query.eq('branch_id', branchId);
         }
         if (typeCarsId) {
-            query = query.eq('type_car_id', typeCarsId);  // ใช้ type_car_id ที่อยู่ในตาราง files โดยตรง
+            query = query.eq('type_car_id', typeCarsId);
         }
 
         const { data, error } = await query;
@@ -65,7 +68,7 @@ export const FilesProvider = ({ children }) => {
 
         const filteredData = data || [];
         setCachedFiles(filteredData);
-        setFiles(filteredData);
+        setFilteredFiles(filteredData); // ตั้งค่าเริ่มต้นของ filteredFiles เป็นข้อมูลทั้งหมด
 
         setTimeout(() => {
             setLoading(false);
@@ -98,14 +101,14 @@ export const FilesProvider = ({ children }) => {
             const filteredData = cachedFiles.filter(file =>
                 file.filename.toLowerCase().includes(searchQueryLower)
             );
-            setFiles(filteredData);
+            setFilteredFiles(filteredData);
         } else {
-            setFiles(cachedFiles);
+            setFilteredFiles(cachedFiles);
         }
     }, [searchQuery, cachedFiles]);
 
     return (
-        <FilesContext.Provider value={{ files, loading, searchQuery, setSearchQuery, fetchFilesWithIcons }}>
+        <FilesContext.Provider value={{ filteredFiles, loading, searchQuery, setSearchQuery, fetchFilesWithIcons }}>
             {children}
         </FilesContext.Provider>
     );

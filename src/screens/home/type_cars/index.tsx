@@ -6,16 +6,21 @@ import color from '../../../constant/color'
 import { useFetchTypeCar } from '../../../hooks/useFetchTypeCar'
 import CustomHeader from '../../../navigation/CustomHeader'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { useFiles } from '../../../context/FilesComtext'
+import LoadingIndicator from '../../../components/LoadingIndicator'
 
 const TypeCarsScreen = ({ navigation, route }) => {
-    const folders = useFetchTypeCar()
+    const { branch } = route.params
+    const { filteredFiles, loading, searchQuery, setSearchQuery } = useFiles({ branch: branch, type_cars: null });
 
-    const { branch } = route.params;
+    const handleSelectTypeCar = (item) => {
+        navigation.navigate('Home', { branch: branch, type_cars: { id: item?.type_car_id, car_type_name: item?.type_cars?.car_type_name } });
+    };
 
     return (
         <View style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
-            <CustomHeader />
+            <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
                 <Pressable
                     onPress={() => navigation.goBack()}
@@ -31,28 +36,48 @@ const TypeCarsScreen = ({ navigation, route }) => {
                 </Pressable>
             </View>
             <View style={{ flex: 1, marginHorizontal: 8 }}>
-                <FlashList
-                    showsVerticalScrollIndicator={false}
-                    overScrollMode="never"
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate("Home", { branch, type_cars: item })}>
-                            <View style={styles.listItemContent}>
-                                {/* @ts-ignore */}
-                                <Image source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/folder.png" }} style={styles.listItemIcon} />
-                                <View style={styles.listItemTextContainer}>
-                                    <Text style={styles.listItemTitle} numberOfLines={1}>
-                                        {item?.car_type_name}
-                                    </Text>
-                                </View>
-                            </View>
+                {loading ? (
+                    <LoadingIndicator message="กำลังโหลด..." />
+                ) : (
+                    <>
+                        {filteredFiles.length > 0 ? (
+                            <FlashList
+                                showsVerticalScrollIndicator={false}
+                                overScrollMode="never"
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity style={styles.listItem} onPress={() => handleSelectTypeCar(item)}>
+                                        <View style={styles.listItemContent}>
+                                            {/* @ts-ignore */}
+                                            <Image source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/folder.png" }} style={styles.listItemIcon} />
+                                            <View style={styles.listItemTextContainer}>
+                                                <Text style={styles.listItemTitle} numberOfLines={1}>
+                                                    {item.type_cars?.car_type_name}
+                                                </Text>
+                                            </View>
+                                        </View>
 
-                            <Ionicons name="chevron-forward" size={16} color={color.blue[950]} />
-                        </TouchableOpacity>
-                    )}
-                    estimatedItemSize={200}
-                    data={folders}
-                />
+                                        <Ionicons name="chevron-forward" size={16} color={color.blue[950]} />
+                                    </TouchableOpacity>
+                                )}
+                                estimatedItemSize={200}
+                                data={filteredFiles}
+                            />
+                        ) : (
+                            <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
+                                <View style={{ gap: 5 }}>
+                                    <Image
+                                        source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/forbidden.png" }}
+                                        style={{ width: 60, height: 60, marginLeft: 8 }} />
+                                    <Text style={[styles.menuText, { color: color.gray[800] }]}>ไม่พบไฟล์</Text>
+                                </View>
+                                <View />
+                            </View>
+                        )}
+                    </>
+
+                )}
+
             </View>
 
         </View>
@@ -105,5 +130,8 @@ const styles = StyleSheet.create({
         color: color.blue[600],
         fontFamily: 'SukhumvitSet-SemiBold',
         marginLeft: 0,
+    },
+    menuText: {
+        fontFamily: 'SukhumvitSet-SemiBold',
     },
 })
