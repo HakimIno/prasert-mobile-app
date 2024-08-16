@@ -9,6 +9,8 @@ type File = {
     filename: string;
     creationdate: string;
     owner: string;
+    storage_provider: string;
+    file_id: string;
     icon: { id: number, icon_url: string }[];
 };
 
@@ -45,6 +47,8 @@ export const FilesProvider = ({ children }) => {
             ),
             branch_id,  
             type_car_id, 
+            storage_provider,
+            file_id,
             branchs:branch_id (branch_name),
             type_cars:type_car_id (car_type_name)
         `)
@@ -114,15 +118,20 @@ export const FilesProvider = ({ children }) => {
     );
 };
 
-export const useFiles = ({ branch, type_cars }) => {
+export const useFiles = ({ branch, type_cars, reset = false }) => {
     const context = useContext(FilesContext);
     if (context === undefined) {
         throw new Error('useFiles must be used within a FilesProvider');
     }
 
     useEffect(() => {
-        context.fetchFilesWithIcons(branch?.id, type_cars?.id);
-    }, [branch, type_cars]);
+        if (reset) {
+            context.fetchFilesWithIcons(branch?.id, null);
+        } else {
+            context.fetchFilesWithIcons(branch?.id, type_cars?.id);
+        }
+    }, [branch, type_cars, reset]);
 
     return context;
 };
+

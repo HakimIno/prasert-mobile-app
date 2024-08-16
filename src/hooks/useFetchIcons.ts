@@ -21,23 +21,23 @@ export const useFetchIcons = () => {
         // Fetch the data once when the component mounts
         fetchIcons();
 
-        // Set up a Realtime subscription to listen for changes
-        const channel = supabase
-            .channel('public:icon')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'icon' },
-                (payload) => {
-                    console.log('Change detected in icon table:', payload);
-                    fetchIcons(); // Refresh data when a change is detected
-                }
-            )
-            .subscribe();
+        // // Set up a Realtime subscription to listen for changes
+        // const channel = supabase
+        //     .channel('public:icon')
+        //     .on(
+        //         'postgres_changes',
+        //         { event: '*', schema: 'public', table: 'icon' },
+        //         (payload) => {
+        //             console.log('Change detected in icon table:', payload);
+        //             fetchIcons(); // Refresh data when a change is detected
+        //         }
+        //     )
+        //     .subscribe();
 
-        // Cleanup subscription on component unmount
-        return () => {
-            supabase.removeChannel(channel);
-        };
+        // // Cleanup subscription on component unmount
+        // return () => {
+        //     supabase.removeChannel(channel);
+        // };
     }, []); // Empty dependency array ensures it only runs once on mount
 
     return dataIcon;

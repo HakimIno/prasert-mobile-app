@@ -15,9 +15,27 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "buildConfiguration": "Release",
+        "enterpriseProvisioning": "universal"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "sosolo5556@hotmail.com",
+        "ascAppId": "6639605156"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./path-to-your-service-account.json",
+        "track": "production",
+        "releaseStatus": "completed"
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable } from 'react-native';
+import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import color from '../../../constant/color';
@@ -13,26 +13,38 @@ import { useAuth } from '../../../context/AuthContext';
 import { useFiles } from '../../../context/FilesComtext';
 import CustomHeader from '../../../navigation/CustomHeader';
 import LoadingIndicator from '../../../components/LoadingIndicator';
+import Breadcrumb from '../../../components/BreadcrumbButtonÏ';
 
 const HomeScreen = ({ navigation, route }) => {
     const { branch, type_cars } = route.params;
+
+    if (!branch || !type_cars) {
+        console.error("Branch or Type Cars is missing in route params");
+        return null; // หรือนำไปแสดงหน้า error หรือข้อความแจ้งเตือน
+    }
+
     const [selectedFilter, setSelectedFilter] = useState(0);
+    const { filteredFiles: files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
+
+    const filteredFiles = selectedFilter === 0
+        ? files
+        : files.filter((folder: any) => folder.icon.id === selectedFilter);
+
+
     const { session } = useAuth();
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const [fileId, setFileId] = useState("")
     const [fileName, setfileName] = useState("")
+    const [storageProvider, setStorageProvider] = useState("")
 
     const dataIcon = useFetchIcons();
 
     const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
     // ฟังก์ชันกรองข้อมูล
-    const { filteredFiles: files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
-    const filteredFiles = selectedFilter === 0
-        ? files
-        : files.filter((folder: any) => folder.icon.id === selectedFilter)
+
 
 
     const handleOpenMenu = (item, event) => {
@@ -61,7 +73,7 @@ const HomeScreen = ({ navigation, route }) => {
         const refreshToken = session?.refresh_token;
 
         if (accessToken && refreshToken) {
-            const uri = await downloadFile(fileId, accessToken, refreshToken, fileName);
+            const uri = await downloadFile(fileId, accessToken, refreshToken, fileName, storageProvider);
             if (uri) {
                 openFile(uri);
             }
@@ -72,16 +84,30 @@ const HomeScreen = ({ navigation, route }) => {
     };
 
 
-    const downloadFile = async (fileIdx: string, accessToken: string, refreshToken: string, file_name: string) => {
+    const downloadFile = async (
+        fileIdx: string,
+        accessToken: string,
+        refreshToken: string,
+        file_name: string,
+        storageProvider: string
+    ) => {
         try {
-            const apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
+            let apiEndpoint: string;
+            if (storageProvider === 'cloudinary') {
+                apiEndpoint = `https://res.cloudinary.com/dkm0oeset/image/upload/${fileIdx}`;
+            } else if (storageProvider === 'google_drive') {
+                apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
+            } else {
+                throw new Error('Unsupported storage provider');
+            }
+
             const fileUri = FileSystem.documentDirectory + file_name;
 
             const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
-                headers: {
+                headers: storageProvider === 'google_drive' ? {
                     Authorization: `Bearer ${accessToken}`,
                     'x-refresh-token': refreshToken,
-                },
+                } : undefined,
             });
 
             if (!response.uri) {
@@ -95,6 +121,7 @@ const HomeScreen = ({ navigation, route }) => {
         }
     };
 
+
     const openFile = async (fileUri: string) => {
         if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(fileUri);
@@ -103,29 +130,31 @@ const HomeScreen = ({ navigation, route }) => {
         }
     };
 
+    const breadcrumbItems = [
+        {
+            label: 'หน้าแรก',
+            onPress: () => navigation.goBack(),
+            icon: <AntDesign name="home" size={18} color={color.blue[600]} />,
+        },
+        {
+            label: branch?.branch_name,
+            onPress: () => navigation.goBack(),
+        },
+        {
+            label: type_cars?.car_type_name,
+            onPress: () => { },
+            style: { backgroundColor: color.blue[600] },
+            textStyle: { color: color.white },
+        },
+    ];
+
+
     return (
         <View style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
             <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
-                <Pressable
-                    onPress={() => navigation.goBack()}
-                    style={[styles.button, styles.firstButton]}>
-                    <AntDesign name="home" size={18} color={color.blue[600]} />
-                    <Text style={styles.buttonText}>หน้าแรก</Text>
-                </Pressable>
-                <Ionicons name="chevron-forward" size={16} color={color.blue[600]} />
-                <Pressable
-                    onPress={() => navigation.goBack()}
-                    style={styles.button}>
-                    <Text style={styles.buttonText}>{branch?.branch_name}</Text>
-                </Pressable>
-                <Ionicons name="chevron-forward" size={16} color={color.blue[600]} />
-                <Pressable
-                    onPress={() => { }}
-                    style={[styles.button, { backgroundColor: color.blue[600] }]}>
-                    <Text style={[styles.buttonText, { color: color.white }]}>{type_cars?.car_type_name}</Text>
-                </Pressable>
+            <View style={{ height: 40 }}>
+                <Breadcrumb items={breadcrumbItems} navigation={navigation} />
             </View>
             <View style={{ flex: 1, marginHorizontal: 8 }}>
                 <View style={styles.tabContainer}>
@@ -165,10 +194,22 @@ const HomeScreen = ({ navigation, route }) => {
                                 overScrollMode="never"
                                 keyExtractor={(item) => item.id.toString()}
                                 renderItem={({ item }) => (
-                                    <View style={styles.listItem}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (item?.storage_provider === "cloudinary") {
+                                                navigation.navigate('ImageView', { item })
+                                            }
+                                        }}
+                                        style={styles.listItem}>
                                         <View style={styles.listItemContent}>
                                             {/* @ts-ignore */}
-                                            <Image source={{ uri: item?.icon?.icon_url }} style={styles.listItemIcon} />
+                                            {item?.storage_provider === "cloudinary" ? (
+                                                <Image source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.png` }} style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }} />
+                                            ) : (
+                                                // @ts-ignore 
+                                                <Image source={{ uri: item.icon.icon_url }} style={styles.listItemIcon} />
+                                            )}
+
                                             <View style={styles.listItemTextContainer}>
                                                 <Text style={styles.listItemTitle} numberOfLines={1}>
                                                     {item.filename}
@@ -186,12 +227,13 @@ const HomeScreen = ({ navigation, route }) => {
                                                 //@ts-ignore
                                                 setFileId(item?.file_id)
                                                 setfileName(item?.filename)
+                                                setStorageProvider(item?.storage_provider)
                                                 handleOpenMenu(item, event)
                                             }}
                                             style={styles.listItemAction}>
                                             <Ionicons name="ellipsis-vertical" size={20} color="black" />
                                         </TouchableOpacity>
-                                    </View>
+                                    </TouchableOpacity>
                                 )}
                                 estimatedItemSize={200}
                                 data={filteredFiles}
@@ -285,7 +327,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 15,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         borderBottomWidth: 0.3,
         borderColor: color.zinc[200]
     },
@@ -299,7 +341,7 @@ const styles = StyleSheet.create({
         height: 30,
     },
     listItemTextContainer: {
-        width: "78%"
+        width: "70%"
     },
     listItemTitle: {
         fontFamily: 'SukhumvitSet-Bold',

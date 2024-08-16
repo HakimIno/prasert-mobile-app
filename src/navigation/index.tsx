@@ -10,6 +10,7 @@ import SignupScreen from '../screens/auth/signupscreen';
 import { ActivityIndicator, Text, View } from 'react-native';
 import color from '../constant/color';
 import { StatusBar } from 'expo-status-bar';
+import ImageView from '../screens/home/ImageView/ImageView';
 
 const Stack = createStackNavigator();
 
@@ -50,6 +51,14 @@ const AppNavigator = () => {
                         <Stack.Screen name="Folder" component={FolderScreen} />
                         <Stack.Screen name="TypeCars" component={TypeCarsScreen} />
                         <Stack.Screen name="Home" component={HomeScreen} />
+                        <Stack.Screen name="ImageView" component={ImageView}
+                            options={{
+                                headerShown: true,
+                                headerTitle: "ดูรูปภาพ",
+                                headerTitleStyle: {
+                                    fontFamily: 'SukhumvitSet-SemiBold',
+                                }
+                            }} />
                     </>
                 ) : (
                     <>
