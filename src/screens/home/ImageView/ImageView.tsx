@@ -11,7 +11,7 @@ const ImageView = ({ route }) => {
             <Image
                 source={{
                     uri: item?.storage_provider === "cloudinary" ?
-                        `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.png` :
+                        `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` :
                         item.icon?.icon_url
                 }}
                 style={styles.image}

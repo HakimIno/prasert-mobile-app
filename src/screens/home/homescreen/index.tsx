@@ -210,7 +210,7 @@ const HomeScreen = ({ navigation, route }) => {
                                             style={styles.listItemContent}>
                                             {/* @ts-ignore */}
                                             {item?.storage_provider === "cloudinary" ? (
-                                                <Image source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.png` }} style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }} />
+                                                <Image source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` }} style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }} />
                                             ) : (
                                                 // @ts-ignore 
                                                 <Image source={{ uri: item.icon.icon_url }} style={styles.listItemIcon} />
