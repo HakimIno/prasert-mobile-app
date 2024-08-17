@@ -12,7 +12,7 @@ const BreadcrumbButton = ({ onPress, children, icon, style, textStyle }) => (
     </Pressable>
 );
 
-export default function Breadcrumb({ items, navigation }) {
+export default function Breadcrumb({ items }) { // ไม่มีการส่ง navigation ตรงนี้
     return (
         <ScrollView
             style={styles.scrollView}

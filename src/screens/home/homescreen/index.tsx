@@ -7,7 +7,6 @@ import { FlashList } from '@shopify/flash-list';
 import { useFetchIcons } from '../../../hooks/useFetchIcons';
 import dayjs from 'dayjs';
 import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '../../../context/AuthContext';
 import { useFiles } from '../../../context/FilesComtext';
@@ -131,20 +130,21 @@ const HomeScreen = ({ navigation, route }) => {
     const breadcrumbItems = [
         {
             label: 'หน้าแรก',
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.goBack(), // นำทางกลับไปยังหน้าก่อนหน้า
             icon: <AntDesign name="home" size={18} color={color.blue[600]} />,
         },
         {
             label: branch?.branch_name,
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.goBack(), // นำทางไปยังหน้าสาขา
         },
         {
             label: type_cars?.car_type_name,
-            onPress: () => { },
+            onPress: () => { }, // ถ้าหน้านี้เป็นหน้าปัจจุบัน อาจจะไม่ต้องทำอะไร
             style: { backgroundColor: color.blue[600] },
             textStyle: { color: color.white },
         },
     ];
+
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -158,7 +158,7 @@ const HomeScreen = ({ navigation, route }) => {
             <StatusBar style="auto" backgroundColor='white' />
             <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <View style={{ height: 40 }}>
-                <Breadcrumb items={breadcrumbItems} navigation={navigation} />
+                <Breadcrumb items={breadcrumbItems} />
             </View>
             <View style={{ flex: 1, marginHorizontal: 8 }}>
                 <View style={styles.tabContainer}>

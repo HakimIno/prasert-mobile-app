@@ -8,7 +8,6 @@ import CustomHeader from '../../../navigation/CustomHeader'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import { useFiles } from '../../../context/FilesComtext'
 import LoadingIndicator from '../../../components/LoadingIndicator'
-import { useFocusEffect } from '@react-navigation/native'
 
 const TypeCarsScreen = ({ navigation, route }) => {
     const { branch } = route.params;
