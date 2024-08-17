@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 
-export const useFetchTypeCar = () => {
+export const useFetchTypeCar = (branchId: unknown) => {
     const [dataTypeCars, setDataTypeCars] = useState<{ id: number, car_type_name: string }[]>([]);
+    const [loading, setLoading] = useState<boolean>(true); // สถานะ loading
 
-    const fetchBranchs = async () => {
+    const fetchTypeCars = async () => {
+        setLoading(true); // เริ่มต้นการโหลด
         const { data, error } = await supabase
             .from('type_cars')
             .select('*')
+            .eq('branch_id', branchId) // กรองข้อมูลตาม branch_id
             .order('id', { ascending: true });
 
         if (error) {
@@ -15,27 +18,30 @@ export const useFetchTypeCar = () => {
         } else {
             setDataTypeCars(data);
         }
+        setLoading(false); // สิ้นสุดการโหลด
     };
 
     useEffect(() => {
-        fetchBranchs();
+        if (branchId) {
+            fetchTypeCars();
 
-        const channel = supabase
-            .channel('public:type_cars')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'type_cars' },
-                (payload) => {
-                    console.log('Change detected in type_cars table:', payload);
-                    fetchBranchs(); // Refresh data when a change is detected
-                }
-            )
-            .subscribe();
+            const channel = supabase
+                .channel('public:type_cars')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'type_cars' },
+                    (payload) => {
+                        console.log('Change detected in type_cars table:', payload);
+                        fetchTypeCars(); // Refresh data when a change is detected
+                    }
+                )
+                .subscribe();
 
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, []);
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        }
+    }, [branchId]); // Re-run when branchId changes
 
-    return dataTypeCars;
+    return { dataTypeCars, loading, fetchTypeCars }; // ส่งสถานะ loading กลับไปด้วย
 };

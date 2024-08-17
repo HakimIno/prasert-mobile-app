@@ -72,11 +72,9 @@ export const FilesProvider = ({ children }) => {
 
         const filteredData = data || [];
         setCachedFiles(filteredData);
-        setFilteredFiles(filteredData); // ตั้งค่าเริ่มต้นของ filteredFiles เป็นข้อมูลทั้งหมด
+        setFilteredFiles(filteredData);
 
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -118,20 +116,15 @@ export const FilesProvider = ({ children }) => {
     );
 };
 
-export const useFiles = ({ branch, type_cars, reset = false }) => {
+export const useFiles = ({ branch, type_cars }) => {
     const context = useContext(FilesContext);
     if (context === undefined) {
         throw new Error('useFiles must be used within a FilesProvider');
     }
 
     useEffect(() => {
-        if (reset) {
-            context.fetchFilesWithIcons(branch?.id, null);
-        } else {
-            context.fetchFilesWithIcons(branch?.id, type_cars?.id);
-        }
-    }, [branch, type_cars, reset]);
+        context.fetchFilesWithIcons(branch?.id, type_cars?.id);
+    }, [branch, type_cars]);
 
     return context;
 };
-

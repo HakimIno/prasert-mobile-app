@@ -12,41 +12,8 @@ import { useFocusEffect } from '@react-navigation/native'
 
 const TypeCarsScreen = ({ navigation, route }) => {
     const { branch } = route.params;
-    const [resetFlag, setResetFlag] = React.useState(false);
-    const [matchedCarTypeNames, setMatchedCarTypeNames] = React.useState([]);
-
-    const typeCars = useFetchTypeCar();
-    const { filteredFiles, loading, searchQuery, setSearchQuery } = useFiles({ branch: branch, type_cars: null, reset: resetFlag });
-
-    const calculateMatchedCarTypeNames = React.useCallback(() => {
-        const matched = Array.from(
-            new Set(
-                filteredFiles
-                    .filter((file: any) => typeCars.some(typeCar => typeCar.id === file.type_car_id))
-                    .map((file: any) => {
-                        const matchedTypeCar = typeCars.find(typeCar => typeCar.id === file.type_car_id);
-                        return matchedTypeCar ? matchedTypeCar : null;
-                    })
-            )
-        ).filter(carTypeName => carTypeName !== null);
-
-        setMatchedCarTypeNames(matched);
-    }, [filteredFiles, typeCars]);
-
-    useFocusEffect(
-        React.useCallback(() => {
-            if (!resetFlag) {
-                setResetFlag(true); // ตั้งค่า reset ให้เป็น true เมื่อหน้าจอได้รับโฟกัส
-                calculateMatchedCarTypeNames(); // คำนวณค่าใหม่
-            }
-        }, [branch, typeCars])
-    );
-
-    React.useEffect(() => {
-        if (resetFlag) {
-            setResetFlag(false); // รีเซ็ต resetFlag หลังจากข้อมูลถูกโหลดใหม่แล้ว
-        }
-    }, [filteredFiles]);
+    const { searchQuery, setSearchQuery } = useFiles({ branch: branch, type_cars: null });
+    const { dataTypeCars, loading, } = useFetchTypeCar(branch?.id);
 
     const handleSelectTypeCar = (item) => {
         navigation.navigate('Home', { branch: branch, type_cars: { id: item?.id, car_type_name: item?.car_type_name } });
@@ -76,7 +43,7 @@ const TypeCarsScreen = ({ navigation, route }) => {
                     <LoadingIndicator message="กำลังโหลด..." />
                 ) : (
                     <>
-                        {matchedCarTypeNames.length > 0 ? (
+                        {dataTypeCars.length > 0 ? (
                             <FlashList
                                 showsVerticalScrollIndicator={false}
                                 overScrollMode="never"
@@ -97,7 +64,7 @@ const TypeCarsScreen = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 )}
                                 estimatedItemSize={200}
-                                data={matchedCarTypeNames}
+                                data={dataTypeCars}
                             />
                         ) : (
                             <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>

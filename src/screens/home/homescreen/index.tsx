@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable, ScrollView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable, ScrollView, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import color from '../../../constant/color';
@@ -24,8 +24,7 @@ const HomeScreen = ({ navigation, route }) => {
     }
 
     const [selectedFilter, setSelectedFilter] = useState(0);
-    const { filteredFiles: files, loading, searchQuery, setSearchQuery } = useFiles({ branch, type_cars });
-
+    const { filteredFiles: files, loading, searchQuery, setSearchQuery, fetchFilesWithIcons } = useFiles({ branch, type_cars });
     const filteredFiles = selectedFilter === 0
         ? files
         : files.filter((folder: any) => folder.icon.id === selectedFilter);
@@ -44,7 +43,6 @@ const HomeScreen = ({ navigation, route }) => {
     const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
     // ฟังก์ชันกรองข้อมูล
-
 
 
     const handleOpenMenu = (item, event) => {
@@ -148,6 +146,12 @@ const HomeScreen = ({ navigation, route }) => {
         },
     ];
 
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchFilesWithIcons(branch?.id, type_cars?.id).then(() => setRefreshing(false));
+    }, [fetchFilesWithIcons, branch, type_cars]);
 
     return (
         <View style={styles.container}>
@@ -194,14 +198,16 @@ const HomeScreen = ({ navigation, route }) => {
                                 overScrollMode="never"
                                 keyExtractor={(item) => item.id.toString()}
                                 renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            if (item?.storage_provider === "cloudinary") {
-                                                navigation.navigate('ImageView', { item })
-                                            }
-                                        }}
+                                    <View
+
                                         style={styles.listItem}>
-                                        <View style={styles.listItemContent}>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                if (item?.storage_provider === "cloudinary") {
+                                                    navigation.navigate('ImageView', { item })
+                                                }
+                                            }}
+                                            style={styles.listItemContent}>
                                             {/* @ts-ignore */}
                                             {item?.storage_provider === "cloudinary" ? (
                                                 <Image source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.png` }} style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }} />
@@ -221,7 +227,7 @@ const HomeScreen = ({ navigation, route }) => {
                                                     </Text>
                                                 </View>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={(event) => {
                                                 //@ts-ignore
@@ -233,10 +239,17 @@ const HomeScreen = ({ navigation, route }) => {
                                             style={styles.listItemAction}>
                                             <Ionicons name="ellipsis-vertical" size={20} color="black" />
                                         </TouchableOpacity>
-                                    </TouchableOpacity>
+                                    </View>
                                 )}
                                 estimatedItemSize={200}
                                 data={filteredFiles}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={[color.blue[500]]} // เปลี่ยนสีของวงกลมที่หมุนเมื่อรีเฟรช
+                                    />
+                                }
                             />
                         ) : (
                             <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
