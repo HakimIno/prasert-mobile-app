@@ -26,30 +26,29 @@ const ImageView = ({ route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
         backgroundColor: color.white,
-        padding: 15
+        padding: 5
     },
     image: {
         width: "100%",
-        height: "60%",
-        resizeMode: 'cover',
+        height: 300,
+        resizeMode: 'contain',
         borderRadius: 15,
-        backgroundColor: color.zinc[50],
+        backgroundColor: color.white,
     },
     textContainer: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
         paddingVertical: 1,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        marginTop: 20
+        paddingHorizontal: 15,
+        borderRadius: 10,
+        marginTop: 5,
+
     },
     text: {
-        fontSize: 18,
-        fontFamily: 'SukhumvitSet-SemiBold',
-        color: 'white',
-        textAlign: 'center',
+        fontSize: 16,
+        fontFamily: 'SukhumvitSet-Bold',
+        color: '#1a1a1a',
+        textAlign: 'left',
     },
 });
 

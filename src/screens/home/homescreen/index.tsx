@@ -153,6 +153,7 @@ const HomeScreen = ({ navigation, route }) => {
         fetchFilesWithIcons(branch?.id, type_cars?.id).then(() => setRefreshing(false));
     }, [fetchFilesWithIcons, branch, type_cars]);
 
+
     return (
         <View style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
@@ -350,8 +351,8 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     listItemIcon: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
     },
     listItemTextContainer: {
         width: "70%"
