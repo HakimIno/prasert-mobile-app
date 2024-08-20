@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { FlashList } from '@shopify/flash-list'
 import color from '../../../constant/color'
@@ -8,12 +8,32 @@ import CustomHeader from '../../../navigation/CustomHeader'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import { useFiles } from '../../../context/FilesComtext'
 import LoadingIndicator from '../../../components/LoadingIndicator'
+import { useFocusEffect } from '@react-navigation/native'
 
 const TypeCarsScreen = ({ navigation, route }) => {
     const { branch } = route.params;
     const { searchQuery, setSearchQuery } = useFiles({ branch: branch, type_cars: null });
-    const { dataTypeCars, loading, } = useFetchTypeCar(branch?.id);
+    const { dataTypeCars, loading } = useFetchTypeCar(branch?.id);
 
+    useFocusEffect(
+        React.useCallback(() => {
+            if (branch) {
+                setSearchQuery("");
+            }
+        }, [branch])
+    );
+
+    const filteredTypeCars = useMemo(() => {
+        if (!searchQuery) return dataTypeCars;
+
+        const searchQueryLowerCase = searchQuery.toLowerCase();
+
+        const filteredCars = dataTypeCars.filter(typeCar =>
+            typeCar.car_type_name.toLowerCase().includes(searchQueryLowerCase)
+        );
+
+        return filteredCars;
+    }, [dataTypeCars, searchQuery]);
     const handleSelectTypeCar = (item) => {
         navigation.navigate('Home', { branch: branch, type_cars: { id: item?.id, car_type_name: item?.car_type_name } });
     };
@@ -42,7 +62,7 @@ const TypeCarsScreen = ({ navigation, route }) => {
                     <LoadingIndicator message="กำลังโหลด..." />
                 ) : (
                     <>
-                        {dataTypeCars.length > 0 ? (
+                        {filteredTypeCars.length > 0 ? (
                             <FlashList
                                 showsVerticalScrollIndicator={false}
                                 overScrollMode="never"
@@ -63,7 +83,7 @@ const TypeCarsScreen = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 )}
                                 estimatedItemSize={200}
-                                data={dataTypeCars}
+                                data={filteredTypeCars}
                             />
                         ) : (
                             <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>

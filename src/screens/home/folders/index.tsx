@@ -1,52 +1,19 @@
-import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useEffect, useMemo, useState } from 'react'
+
+import { ActivityIndicator, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import React, { useMemo, useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { FlashList } from '@shopify/flash-list'
 import color from '../../../constant/color'
-import { useFetchBranchs } from '../../../hooks/useFetchBranchs'
 import CustomHeader from '../../../navigation/CustomHeader'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
-import { useFiles } from '../../../context/FilesComtext'
 import { useFocusEffect } from '@react-navigation/native'
-import { useAuth } from '../../../context/AuthContext'
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+
 import dayjs from 'dayjs'
+import { useCombinedData } from '../../../hooks/useCombinedData'
+import { useDownloadFile } from '../../../hooks/useDownloadFile'
 
-type FolderType = {
-    type: 'folder';
-    id: number;
-    branch_name: string;
-};
-
-type FileType = {
-    type: 'file';
-    branchs: any;
-    type_cars: any;
-    branch_id: number;
-    id: number;
-    filename: string;
-    creationdate: string;
-    owner: string;
-    storage_provider: string;
-    file_id: string;
-    icon: { id: number; icon_url: string; }[]; // ปรับเป็นอาร์เรย์ของอ็อบเจ็กต์
-};
-
-
-type CombinedDataType = FolderType | FileType;
 
 const FolderScreen = ({ navigation }) => {
-    const folders = useFetchBranchs();
-    const { filteredFiles, loading, searchQuery, setSearchQuery, fetchFilesWithIcons } = useFiles({ branch: null, type_cars: null });
-
-    useFocusEffect(
-        React.useCallback(() => {
-            fetchFilesWithIcons();
-            return () => { };
-        }, [])
-    );
-
     const [fileId, setFileId] = useState("")
     const [fileName, setfileName] = useState("")
     const [storageProvider, setStorageProvider] = useState("")
@@ -54,22 +21,31 @@ const FolderScreen = ({ navigation }) => {
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const [isLoading, setIsLoading] = useState(false);
 
-    const { session } = useAuth();
+    const { combinedData, isFileType, searchQuery, setSearchQuery, fetchFilesWithIcons } = useCombinedData();
 
-    const combinedData: CombinedDataType[] = useMemo(() => {
-        if (searchQuery) {
-            return filteredFiles.map(file => ({ ...file, type: 'file' }));
-        } else {
-            return folders.map(folder => ({ ...folder, type: 'folder' }));
-        }
-    }, [folders, filteredFiles, searchQuery]);
+    const { downloadFile, openFile } = useDownloadFile()
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchFilesWithIcons();
+        }, [])
+    );
+
+    const nonPdfFiles = useMemo(() => {
+        return combinedData.filter(isFileType).filter(item => !item.filename.toLowerCase().endsWith('.pdf'));
+    }, [combinedData]);
 
     const handlePress = (item: any) => {
         if (item.type === 'folder') {
-            navigation.navigate("TypeCars", { branch: item });
-        } else if (item.type === 'file') {
-            if (item?.storage_provider === "cloudinary") {
-                navigation.navigate('ImageView', { item });
+            if (item.type_in === "branch") {
+                navigation.navigate("TypeCars", { branch: item });
+            } else {
+                navigation.navigate('Home', { branch: null, type_cars: { id: item?.id, car_type_name: item?.car_type_name } });
+            }
+        } else if (isFileType(item)) {
+            if (item.storage_provider === "cloudinary") {
+                const nonPdfIndex = nonPdfFiles.findIndex(file => file.file_id === item.file_id);
+                navigation.navigate('ImageView', { items: nonPdfFiles, initialIndex: nonPdfIndex });
             }
         }
     };
@@ -90,69 +66,22 @@ const FolderScreen = ({ navigation }) => {
 
         setMenuPosition({ top: pageY, left: leftPosition });
         setMenuVisible(true);
+        setFileId(item?.file_id);
+        setfileName(item?.filename);
+        setStorageProvider(item?.storage_provider);
     };
-
 
     const handleDownload = async () => {
         setIsLoading(true); // เริ่มแสดง loading
-        const accessToken = session?.access_token;
-        const refreshToken = session?.refresh_token;
-
-        if (accessToken && refreshToken) {
-            const uri = await downloadFile(fileId, accessToken, refreshToken, fileName, storageProvider);
-            if (uri) {
-                openFile(uri);
-            }
-        } else {
-            console.log('Tokens are not available');
+        const uri = await downloadFile(fileId, fileName, storageProvider);
+        if (uri) {
+            openFile(uri);
         }
         setIsLoading(false); // หยุดแสดง loading
     };
 
-    const downloadFile = async (
-        fileIdx: string,
-        accessToken: string,
-        refreshToken: string,
-        file_name: string,
-        storageProvider: string
-    ) => {
-        try {
-            let apiEndpoint: string;
-            if (storageProvider === 'cloudinary') {
-                apiEndpoint = `https://res.cloudinary.com/dkm0oeset/image/upload/${fileIdx}`;
-            } else if (storageProvider === 'google_drive') {
-                apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
-            } else {
-                throw new Error('Unsupported storage provider');
-            }
 
-            const fileUri = FileSystem.documentDirectory + file_name;
 
-            const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
-                headers: storageProvider === 'google_drive' ? {
-                    Authorization: `Bearer ${accessToken}`,
-                    'x-refresh-token': refreshToken,
-                } : undefined,
-            });
-
-            if (!response.uri) {
-                throw new Error(`Failed to download file: ${response.status}`);
-            }
-
-            Alert.alert('Download complete', `File saved to: ${response.uri}`);
-            return response.uri;
-        } catch (error) {
-            Alert.alert('Download failed', error.message);
-        }
-    };
-
-    const openFile = async (fileUri: string) => {
-        if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(fileUri);
-        } else {
-            Alert.alert('Error', 'Sharing is not available on this device');
-        }
-    };
 
     return (
         <View style={styles.container}>
@@ -161,7 +90,7 @@ const FolderScreen = ({ navigation }) => {
             <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
                 <Pressable
                     onPress={() => { }}
-                    style={[styles.button, styles.firstButton, { gap: 2 }]}>
+                    style={[styles.button, styles.firstButton, { gap: 2, marginVertical: 5 }]}>
                     <AntDesign name="home" size={18} color={color.white} />
                     <Text style={styles.buttonText}>หน้าแรก</Text>
                 </Pressable>
@@ -171,67 +100,7 @@ const FolderScreen = ({ navigation }) => {
                     showsVerticalScrollIndicator={false}
                     overScrollMode="never"
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity style={styles.listItem} onPress={() => handlePress(item)}>
-                            <View style={styles.listItemContent}>
-
-                                {item.type === 'folder' ? (
-                                    <Image source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/folder.png" }} style={styles.listItemIcon} />
-                                ) : (
-
-                                    <Image
-
-                                        source={{
-                                            uri: item?.storage_provider === "cloudinary" ?
-                                                `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` :
-                                                // @ts-ignore
-                                                item.icon.icon_url
-                                        }}
-                                        style={{
-                                            width: 50,
-                                            height: 50,
-                                            resizeMode: 'cover',
-                                            borderWidth: 0.5,
-                                            borderColor: color.gray[300],
-                                            borderRadius: 5
-                                        }} />
-                                )}
-
-
-                                {item.type === "folder" ? (
-                                    <View style={styles.listItemTextContainer}>
-                                        <Text style={styles.listItemTitle} numberOfLines={1}>
-                                            {item.branch_name}
-                                        </Text>
-                                    </View>) : (<View style={styles.listItemTextContainer}>
-                                        <Text style={styles.listItemTitle} numberOfLines={1}>
-                                            {item.filename}
-                                        </Text>
-                                        <View style={styles.listItemSubtextContainer}>
-                                            <Ionicons name="people" size={16} color={color.zinc[400]} />
-                                            <Text style={styles.listItemSubtext} numberOfLines={1}>
-                                                {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
-                                            </Text>
-                                        </View>
-                                    </View>)}
-                            </View>
-
-                            {item.type === "folder" ? (<Ionicons name="chevron-forward" size={16} color={color.blue[950]} />) : (
-                                <TouchableOpacity
-                                    onPress={
-                                        (event) => {
-                                            //@ts-ignore
-                                            setFileId(item?.file_id)
-                                            setfileName(item?.filename)
-                                            setStorageProvider(item?.storage_provider)
-                                            handleOpenMenu(item, event)
-                                        }}
-                                    style={styles.listItemAction}>
-                                    <Ionicons name="ellipsis-vertical" size={20} color="black" />
-                                </TouchableOpacity>
-                            )}
-                        </TouchableOpacity>
-                    )}
+                    renderItem={({ item }) => <FileListItem item={item} handleOpenMenu={handleOpenMenu} handlePress={handlePress} />}
                     estimatedItemSize={200}
                     data={combinedData}
                 />
@@ -266,6 +135,47 @@ const FolderScreen = ({ navigation }) => {
         </View >
     )
 }
+
+
+
+const FileListItem = ({ item, handlePress, handleOpenMenu }) => (
+    <TouchableOpacity style={styles.listItem} onPress={() => handlePress(item)}>
+        <View style={styles.listItemContent}>
+            {item.type === 'folder' ? (
+                <Image source={{ uri: "https://gpamonnosfwdoxjvyrcw.supabase.co/storage/v1/object/public/media/FIleIcon/folder.png" }} style={styles.listItemIcon} />
+            ) : (
+                <Image
+                    source={{
+                        uri: item?.storage_provider === "cloudinary" ?
+                            `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` :
+                            item.icon.icon_url
+                    }}
+                    style={styles.listItemIcon} />
+            )}
+            <View style={styles.listItemTextContainer}>
+                <Text style={styles.listItemTitle} numberOfLines={1}>
+                    {item.type === 'folder' ? item.folderName : item.filename}
+                </Text>
+                {item.type !== 'folder' && (
+                    <View style={styles.listItemSubtextContainer}>
+                        <Ionicons name="people" size={16} color={color.zinc[400]} />
+                        <Text style={styles.listItemSubtext} numberOfLines={1}>
+                            {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
+                        </Text>
+                    </View>
+                )}
+            </View>
+        </View>
+        {item.type === 'folder' ? (
+            <Ionicons name="chevron-forward" size={16} color={color.blue[950]} />
+        ) : (
+            <TouchableOpacity onPress={(event) => handleOpenMenu(item, event)} style={styles.listItemAction}>
+                <Ionicons name="ellipsis-vertical" size={20} color="black" />
+            </TouchableOpacity>
+        )}
+    </TouchableOpacity>
+);
+
 
 export default FolderScreen
 

@@ -11,6 +11,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import color from '../constant/color';
 import { StatusBar } from 'expo-status-bar';
 import ImageView from '../screens/home/ImageView/ImageView';
+import PDFView from '../screens/home/pdfView';
 
 const Stack = createStackNavigator();
 
@@ -51,10 +52,11 @@ const AppNavigator = () => {
                         <Stack.Screen name="Folder" component={FolderScreen} />
                         <Stack.Screen name="TypeCars" component={TypeCarsScreen} />
                         <Stack.Screen name="Home" component={HomeScreen} />
-                        <Stack.Screen name="ImageView" component={ImageView}
+                        <Stack.Screen name="ImageView" component={ImageView} />
+                        <Stack.Screen name="PDFView" component={PDFView}
                             options={{
                                 headerShown: true,
-                                headerTitle: "ดูรูปภาพ",
+                                headerTitle: "ดูPDF",
                                 headerTitleStyle: {
                                     fontFamily: 'SukhumvitSet-SemiBold',
                                 }

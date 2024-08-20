@@ -6,30 +6,27 @@ import color from '../../../constant/color';
 import { FlashList } from '@shopify/flash-list';
 import { useFetchIcons } from '../../../hooks/useFetchIcons';
 import dayjs from 'dayjs';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { useAuth } from '../../../context/AuthContext';
 import { useFiles } from '../../../context/FilesComtext';
 import CustomHeader from '../../../navigation/CustomHeader';
 import Breadcrumb from '../../../components/BreadcrumbButton';
 import LoadingIndicator from '../../../components/LoadingIndicator';
+import { useFocusEffect } from '@react-navigation/native';
+import { useDownloadFile } from '../../../hooks/useDownloadFile';
 
 const HomeScreen = ({ navigation, route }) => {
     const { branch, type_cars } = route.params;
 
-    if (!branch || !type_cars) {
-        console.error("Branch or Type Cars is missing in route params");
-        return null; // หรือนำไปแสดงหน้า error หรือข้อความแจ้งเตือน
-    }
-
     const [selectedFilter, setSelectedFilter] = useState(0);
-    const { filteredFiles: files, loading, searchQuery, setSearchQuery, fetchFilesWithIcons } = useFiles({ branch, type_cars });
+    const { filteredFiles: files, loading, searchQuery, setSearchQuery, fetchFilesWithIcons, resetSearchQuery } = useFiles({ branch, type_cars });
     const filteredFiles = selectedFilter === 0
         ? files
         : files.filter((folder: any) => folder.icon.id === selectedFilter);
 
-
-    const { session } = useAuth();
+    useFocusEffect(
+        React.useCallback(() => {
+            resetSearchQuery();
+        }, [type_cars])
+    );
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -41,21 +38,18 @@ const HomeScreen = ({ navigation, route }) => {
 
     const dataWithAllTab = [{ id: 0, abbreviation: "ทั้งหมด", icon_url: "https://cdn-icons-png.freepik.com/512/9061/9061169.png" }, ...dataIcon];
 
-    // ฟังก์ชันกรองข้อมูล
-
+    const { downloadFile, openFile } = useDownloadFile()
 
     const handleOpenMenu = (item, event) => {
         const { pageX, pageY } = event.nativeEvent;
         const screenWidth = Dimensions.get('window').width;
 
-        // สมมติว่าความกว้างของเมนูประมาณ 150 หน่วย
         const menuWidth = 150;
-        const offset = 10; // ขยับเข้ามาทางซ้าย 10 หน่วย
-        let leftPosition = pageX - offset; // เลื่อนเข้ามาทางซ้ายเล็กน้อย
+        const offset = 10;
+        let leftPosition = pageX - offset;
 
-        // ถ้าเมนูหลุดออกไปทางขวาของหน้าจอ ให้เลื่อนเมนูกลับเข้ามา
         if (leftPosition + menuWidth > screenWidth) {
-            leftPosition = screenWidth - menuWidth - 50; // หักลบ 10 หน่วยสำหรับระยะห่างจากขอบจอ
+            leftPosition = screenWidth - menuWidth - 50;
         }
 
         setMenuPosition({ top: pageY, left: leftPosition });
@@ -65,86 +59,31 @@ const HomeScreen = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleDownload = async () => {
-        setIsLoading(true); // เริ่มแสดง loading
-        const accessToken = session?.access_token;
-        const refreshToken = session?.refresh_token;
-
-        if (accessToken && refreshToken) {
-            const uri = await downloadFile(fileId, accessToken, refreshToken, fileName, storageProvider);
-            if (uri) {
-                openFile(uri);
-            }
-        } else {
-            console.log('Tokens are not available');
+        setIsLoading(true);
+        const uri = await downloadFile(fileId, fileName, storageProvider);
+        if (uri) {
+            openFile(uri);
         }
-        setIsLoading(false); // หยุดแสดง loading
-    };
-
-
-    const downloadFile = async (
-        fileIdx: string,
-        accessToken: string,
-        refreshToken: string,
-        file_name: string,
-        storageProvider: string
-    ) => {
-        try {
-            let apiEndpoint: string;
-            if (storageProvider === 'cloudinary') {
-                apiEndpoint = `https://res.cloudinary.com/dkm0oeset/image/upload/${fileIdx}`;
-            } else if (storageProvider === 'google_drive') {
-                apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
-            } else {
-                throw new Error('Unsupported storage provider');
-            }
-
-            const fileUri = FileSystem.documentDirectory + file_name;
-
-            const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
-                headers: storageProvider === 'google_drive' ? {
-                    Authorization: `Bearer ${accessToken}`,
-                    'x-refresh-token': refreshToken,
-                } : undefined,
-            });
-
-            if (!response.uri) {
-                throw new Error(`Failed to download file: ${response.status}`);
-            }
-
-            Alert.alert('Download complete', `File saved to: ${response.uri}`);
-            return response.uri;
-        } catch (error) {
-            Alert.alert('Download failed', error.message);
-        }
-    };
-
-
-    const openFile = async (fileUri: string) => {
-        if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(fileUri);
-        } else {
-            Alert.alert('Error', 'Sharing is not available on this device');
-        }
+        setIsLoading(false);
     };
 
     const breadcrumbItems = [
         {
             label: 'หน้าแรก',
-            onPress: () => navigation.goBack(), // นำทางกลับไปยังหน้าก่อนหน้า
+            onPress: () => navigation.goBack(),
             icon: <AntDesign name="home" size={18} color={color.blue[600]} />,
         },
-        {
-            label: branch?.branch_name,
-            onPress: () => navigation.goBack(), // นำทางไปยังหน้าสาขา
+        branch?.branch_name && {
+            label: branch.branch_name,
+            onPress: () => navigation.goBack(),
         },
-        {
-            label: type_cars?.car_type_name,
-            onPress: () => { }, // ถ้าหน้านี้เป็นหน้าปัจจุบัน อาจจะไม่ต้องทำอะไร
+        type_cars?.car_type_name && {
+            label: type_cars.car_type_name,
+            onPress: () => { },
             style: { backgroundColor: color.blue[600] },
             textStyle: { color: color.white },
         },
-    ];
-
+    ].filter(Boolean);
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -153,6 +92,7 @@ const HomeScreen = ({ navigation, route }) => {
         fetchFilesWithIcons(branch?.id, type_cars?.id).then(() => setRefreshing(false));
     }, [fetchFilesWithIcons, branch, type_cars]);
 
+    const nonPdfFiles = filteredFiles.filter(item => !item.filename.toLowerCase().endsWith('.pdf'));
 
     return (
         <View style={styles.container}>
@@ -198,50 +138,57 @@ const HomeScreen = ({ navigation, route }) => {
                                 showsVerticalScrollIndicator={false}
                                 overScrollMode="never"
                                 keyExtractor={(item) => item.id.toString()}
-                                renderItem={({ item }) => (
-                                    <View
+                                renderItem={({ item, index }) => {
+                                    const nonPdfIndex = nonPdfFiles.findIndex(file => file.file_id === item.file_id);
 
-                                        style={styles.listItem}>
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (item?.storage_provider === "cloudinary") {
-                                                    navigation.navigate('ImageView', { item })
-                                                }
-                                            }}
-                                            style={styles.listItemContent}>
-                                            {/* @ts-ignore */}
-                                            {item?.storage_provider === "cloudinary" ? (
-                                                <Image source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` }} style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }} />
-                                            ) : (
-                                                // @ts-ignore 
-                                                <Image source={{ uri: item.icon.icon_url }} style={styles.listItemIcon} />
-                                            )}
+                                    return (
+                                        <View style={styles.listItem}>
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    if (item.filename.toLowerCase().endsWith('.pdf')) {
+                                                        navigation.navigate('PDFView', { fileId: item.file_id, storageProvider: item?.storage_provider, fileName: item?.filename });
+                                                    } else if (item?.storage_provider === "cloudinary" && nonPdfIndex !== -1) {
+                                                        navigation.navigate('ImageView', { items: nonPdfFiles, initialIndex: nonPdfIndex });
+                                                    }
+                                                }}
+                                                style={styles.listItemContent}>
+                                                {/* @ts-ignore */}
+                                                {item?.storage_provider === "cloudinary" ? (
+                                                    <Image
+                                                        source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` }}
+                                                        style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }}
+                                                    />
+                                                ) : (
+                                                    // @ts-ignore 
+                                                    <Image source={{ uri: item.icon.icon_url }} style={styles.listItemIcon} />
+                                                )}
 
-                                            <View style={styles.listItemTextContainer}>
-                                                <Text style={styles.listItemTitle} numberOfLines={1}>
-                                                    {item.filename}
-                                                </Text>
-                                                <View style={styles.listItemSubtextContainer}>
-                                                    <Ionicons name="people" size={16} color={color.zinc[400]} />
-                                                    <Text style={styles.listItemSubtext} numberOfLines={1}>
-                                                        {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
+                                                <View style={styles.listItemTextContainer}>
+                                                    <Text style={styles.listItemTitle} numberOfLines={1}>
+                                                        {item.filename}
                                                     </Text>
+                                                    <View style={styles.listItemSubtextContainer}>
+                                                        <Ionicons name="people" size={16} color={color.zinc[400]} />
+                                                        <Text style={styles.listItemSubtext} numberOfLines={1}>
+                                                            {item.owner} • {dayjs(item.creationdate).format("DD/MM/YYYY")}
+                                                        </Text>
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={(event) => {
-                                                //@ts-ignore
-                                                setFileId(item?.file_id)
-                                                setfileName(item?.filename)
-                                                setStorageProvider(item?.storage_provider)
-                                                handleOpenMenu(item, event)
-                                            }}
-                                            style={styles.listItemAction}>
-                                            <Ionicons name="ellipsis-vertical" size={20} color="black" />
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={(event) => {
+                                                    //@ts-ignore
+                                                    setFileId(item?.file_id)
+                                                    setfileName(item?.filename)
+                                                    setStorageProvider(item?.storage_provider)
+                                                    handleOpenMenu(item, event)
+                                                }}
+                                                style={styles.listItemAction}>
+                                                <Ionicons name="ellipsis-vertical" size={20} color="black" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                }}
                                 estimatedItemSize={200}
                                 data={filteredFiles}
                                 refreshControl={
@@ -252,6 +199,7 @@ const HomeScreen = ({ navigation, route }) => {
                                     />
                                 }
                             />
+
                         ) : (
                             <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
                                 <View style={{ gap: 5 }}>

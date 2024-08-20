@@ -4,6 +4,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { useFonts } from 'expo-font';
 import { Text, View } from 'react-native';
 import { FilesProvider } from './src/context/FilesComtext';
+import { PDFProvider } from './src/context/PDFContext';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -24,7 +25,9 @@ export default function App() {
   return (
     <AuthProvider>
       <FilesProvider>
-        <AppStackNavigation />
+        <PDFProvider>
+          <AppStackNavigation />
+        </PDFProvider>
       </FilesProvider>
     </AuthProvider>
   );
