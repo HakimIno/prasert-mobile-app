@@ -43,9 +43,11 @@ const FolderScreen = ({ navigation }) => {
                 navigation.navigate('Home', { branch: null, type_cars: { id: item?.id, car_type_name: item?.car_type_name } });
             }
         } else if (isFileType(item)) {
-            if (item.storage_provider === "cloudinary") {
+            if (item.storage_provider === "cloudinary" && !item?.filename.toLowerCase().endsWith('.pdf')) {
                 const nonPdfIndex = nonPdfFiles.findIndex(file => file.file_id === item.file_id);
                 navigation.navigate('ImageView', { items: nonPdfFiles, initialIndex: nonPdfIndex });
+            } else if (item?.filename.toLowerCase().endsWith('.pdf')) {
+                navigation.navigate('PDFView', { fileId: item.file_id, storageProvider: item?.storage_provider, fileName: item?.filename });
             }
         }
     };
@@ -137,7 +139,6 @@ const FolderScreen = ({ navigation }) => {
 }
 
 
-
 const FileListItem = ({ item, handlePress, handleOpenMenu }) => (
     <TouchableOpacity style={styles.listItem} onPress={() => handlePress(item)}>
         <View style={styles.listItemContent}>
@@ -150,7 +151,8 @@ const FileListItem = ({ item, handlePress, handleOpenMenu }) => (
                             `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` :
                             item.icon.icon_url
                     }}
-                    style={styles.listItemIcon} />
+                    style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }}
+                />
             )}
             <View style={styles.listItemTextContainer}>
                 <Text style={styles.listItemTitle} numberOfLines={1}>

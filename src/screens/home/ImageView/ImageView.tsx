@@ -10,7 +10,6 @@ const ImageView = ({ route, navigation }) => {
 
     const renderItem = ({ item }) => (
         <View style={styles.imageContainer}>
-
             <Image
                 source={{
                     uri: item?.storage_provider === "cloudinary" ?
@@ -97,15 +96,15 @@ const styles = StyleSheet.create({
     },
     positionIndicator: {
         position: 'absolute',
-        bottom: 20,
-        left: 0,
-        right: 0,
-        alignItems: 'center',
+        top: "6%",
+        right: "5%",
+        paddingHorizontal: 10,
+        borderRadius: 100,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', // Set background to black
     },
     positionText: {
-        fontSize: 16,
         color: '#fff',
-        fontFamily: 'SukhumvitSet-Bold',
+        fontFamily: 'SukhumvitSet-SemiBold',
     },
 });
 

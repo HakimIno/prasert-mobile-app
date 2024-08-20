@@ -53,14 +53,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="TypeCars" component={TypeCarsScreen} />
                         <Stack.Screen name="Home" component={HomeScreen} />
                         <Stack.Screen name="ImageView" component={ImageView} />
-                        <Stack.Screen name="PDFView" component={PDFView}
-                            options={{
-                                headerShown: true,
-                                headerTitle: "ดูPDF",
-                                headerTitleStyle: {
-                                    fontFamily: 'SukhumvitSet-SemiBold',
-                                }
-                            }} />
+                        <Stack.Screen name="PDFView" component={PDFView} />
                     </>
                 ) : (
                     <>

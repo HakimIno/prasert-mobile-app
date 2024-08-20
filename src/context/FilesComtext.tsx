@@ -11,6 +11,7 @@ type File = {
     owner: string;
     storage_provider: string;
     file_id: string;
+    type_car_id: number;
     icon: { id: number, icon_url: string }[];
 };
 

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, View, ActivityIndicator, Alert, Text } from 'react-native';
+import { StyleSheet, Dimensions, View, ActivityIndicator, Alert, Text, TouchableOpacity } from 'react-native';
 import Pdf from 'react-native-pdf';
 import * as FileSystem from 'expo-file-system';
 import { useAuth } from '../../../context/AuthContext';
 import color from '../../../constant/color';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePDF } from '../../../context/PDFContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const PDFView = ({ route }) => {
+const PDFView = ({ navigation, route }) => {
     const { fileId, fileName, storageProvider } = route.params;
     const [isLoading, setIsLoading] = useState(false);
     const { session } = useAuth();
@@ -45,20 +47,22 @@ const PDFView = ({ route }) => {
     };
 
     const downloadFile = async (
-        fileIdx,
-        accessToken,
-        refreshToken,
-        file_name,
-        storageProvider
+        fileIdx: string,
+        accessToken: string,
+        refreshToken: string,
+        file_name: string,
+        storageProvider: string
     ) => {
         try {
-            let apiEndpoint;
-            if (storageProvider === 'google_drive') {
-                apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
-            } else {
-                throw new Error('Unsupported storage provider');
+            if (storageProvider !== 'google_drive') {
+                Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเปิดดูได้ อาจมีข้อผิดพลาดในการอัปโหลดไฟล์', [
+                    { text: 'OK', onPress: () => { } },
+                ]);
+                setIsLoading(false);
+                return;
             }
 
+            const apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
             const fileUri = FileSystem.documentDirectory + file_name;
 
             const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
@@ -89,8 +93,19 @@ const PDFView = ({ route }) => {
         }, [fileId, pdfData])
     );
 
+    const { top } = useSafeAreaInsets();
+
     return (
         <View style={styles.container}>
+            {/* Header */}
+            <View style={[styles.header, { marginTop: top }]}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={26} color={color.black} />
+                </TouchableOpacity>
+                <Text style={styles.fileName} numberOfLines={1}>{fileName}</Text>
+            </View>
+
+            {/* PDF Content */}
             {isLoading ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size={30} color={color.blue[600]} />
@@ -119,10 +134,26 @@ export default PDFView;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: color.white,
         padding: 10,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: color.zinc[200],
+        marginBottom: 5,
+    },
+    backButton: {
+        paddingLeft: 10,
+        paddingRight: 20,
+    },
+    fileName: {
+        fontSize: 18,
+        fontFamily: 'SukhumvitSet-SemiBold',
+        color: color.black,
+        flex: 1,
     },
     loadingContainer: {
         flex: 1,
