@@ -21,7 +21,6 @@
       },
       "ios": {
         "buildConfiguration": "Release",
-        "enterpriseProvisioning": "universal",
         "buildArtifactPaths": ["ios/build/*"],
         "autoIncrement": true,
         "distribution": "store",

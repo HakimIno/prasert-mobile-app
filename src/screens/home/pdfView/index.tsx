@@ -73,8 +73,6 @@ const PDFView = ({ navigation, route }) => {
                 },
             });
 
-            console.log("response", response);
-
             if (!response.uri) {
                 throw new Error(`Failed to download file: ${response.status}`);
             }
