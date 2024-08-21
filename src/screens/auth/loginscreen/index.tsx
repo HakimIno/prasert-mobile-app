@@ -1,42 +1,43 @@
-import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import React, { useState } from 'react'
 import color from '../../../constant/color';
 import { useAuth } from '../../../context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
 
 const LoginScreen = ({ navigation }) => {
+    const { width, height } = useWindowDimensions(); // ใช้ useWindowDimensions
     const { signIn } = useAuth();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleSignIn = async () => {
-        setLoading(true); // เริ่มการโหลด
+        setLoading(true);
         try {
             await signIn(email, password);
         } catch (error) {
             Alert.alert('Error', (error as Error).message);
         } finally {
-            setLoading(false); // จบการโหลด
+            setLoading(false);
         }
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto" />
-            <View style={[styles.container, { marginHorizontal: 20, flex: 1, justifyContent: 'center', alignItems: 'center', gap: 36 }]}>
+            <View style={[styles.container, { marginHorizontal: width * 0.05, flex: 1, justifyContent: 'center', alignItems: 'center', gap: height * 0.05 }]}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Image
                         source={require("../../../../assets/logo.jpg")}
-                        style={{ width: 120, height: 120, borderRadius: 120, marginBottom: 20, }}
+                        style={{ width: width * 0.3, height: width * 0.3, borderRadius: width * 0.3, marginBottom: height * 0.02 }}
                     />
 
-                    <Text style={{ fontFamily: 'SukhumvitSet-Bold', fontSize: 20 }}>ประเสริฐเจริญยนต์</Text>
+                    <Text style={{ fontFamily: 'SukhumvitSet-Bold', fontSize: width * 0.05 }}>ประเสริฐเจริญยนต์</Text>
                 </View>
 
-                <View style={{ width: "100%", gap: 3 }}>
+                <View style={{ width: "100%", gap: height * 0.005 }}>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { padding: height * 0.02 }]}
                         placeholder='Email'
                         autoComplete="email"
                         placeholderTextColor={'#a1a1aa'}
@@ -47,7 +48,7 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { padding: height * 0.02 }]}
                         placeholder='Password'
                         secureTextEntry
                         placeholderTextColor={'#a1a1aa'}
@@ -56,28 +57,28 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <Pressable
-                        style={styles.btnContainer}
+                        style={[styles.btnContainer, { height: height * 0.07 }]}
                         onPress={handleSignIn}
-                        disabled={loading} // ปิดการใช้งานปุ่มเมื่อกำลังโหลด
+                        disabled={loading}
                     >
                         {loading ? (
                             <ActivityIndicator color={color.white} />
                         ) : (
-                            <Text style={[styles.textInfoSubTitle, { color: color.white, fontFamily: 'SukhumvitSet-Bold' }]}>เข้าสู่ระบบ</Text>
+                            <Text style={[styles.textInfoSubTitle, { color: color.white, fontFamily: 'SukhumvitSet-Bold', fontSize: width * 0.045 }]}>เข้าสู่ระบบ</Text>
                         )}
                     </Pressable>
 
-                    <View style={{ flexDirection: 'row', gap: 3, justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
-                        <Text style={[styles.textInfoSubTitle, { color: color.black, fontFamily: 'SukhumvitSet-Medium' }]}>หากยังไม่มีบัญชีโปรด</Text>
+                    <View style={{ flexDirection: 'row', gap: height * 0.01, justifyContent: 'center', alignItems: 'center', marginTop: height * 0.03 }}>
+                        <Text style={[styles.textInfoSubTitle, { color: color.black, fontFamily: 'SukhumvitSet-Medium', fontSize: width * 0.04 }]}>หากยังไม่มีบัญชีโปรด</Text>
                         <Pressable onPress={() => navigation.navigate("SignUp")}>
-                            <Text style={[styles.textInfoSubTitle, { color: color.blue[600], fontFamily: 'SukhumvitSet-Bold', textDecorationLine: 'underline' }]}>
+                            <Text style={[styles.textInfoSubTitle, { color: color.blue[600], fontFamily: 'SukhumvitSet-Bold', textDecorationLine: 'underline', fontSize: width * 0.04 }]}>
                                 ลงทะเบียน
                             </Text>
                         </Pressable>
                     </View>
                 </View>
             </View>
-        </View >
+        </SafeAreaView >
     )
 }
 
@@ -89,11 +90,10 @@ const styles = StyleSheet.create({
         backgroundColor: color.slate[100]
     },
     textInfoSubTitle: {
-        lineHeight: 20 * 1.5
+        lineHeight: 20 * 1.5 // สามารถใช้ useWindowDimensions เพื่อปรับขนาดตามหน้าจอได้
     },
     input: {
         marginBottom: 20,
-        padding: 15,
         textAlignVertical: 'center',
         backgroundColor: color.white,
         borderRadius: 20,
@@ -103,10 +103,9 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: color.blue[500],
         backgroundColor: color.blue[500],
-        height: 55,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
         marginTop: 10
     },
-})
+});

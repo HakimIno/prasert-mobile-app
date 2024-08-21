@@ -2,7 +2,7 @@ import * as React from 'react';
 import AppStackNavigation from './src/navigation';
 import { AuthProvider } from './src/context/AuthContext';
 import { useFonts } from 'expo-font';
-import { Text, View } from 'react-native';
+import { SafeAreaView, Text, View } from 'react-native';
 import { FilesProvider } from './src/context/FilesComtext';
 import { PDFProvider } from './src/context/PDFContext';
 
@@ -26,7 +26,9 @@ export default function App() {
     <AuthProvider>
       <FilesProvider>
         <PDFProvider>
+
           <AppStackNavigation />
+
         </PDFProvider>
       </FilesProvider>
     </AuthProvider>

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable, ScrollView, RefreshControl } from 'react-native';
+import { View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Dimensions, Alert, ActivityIndicator, Pressable, ScrollView, RefreshControl, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import color from '../../../constant/color';
 import { FlashList } from '@shopify/flash-list';
 import { useFetchIcons } from '../../../hooks/useFetchIcons';
@@ -12,6 +12,7 @@ import Breadcrumb from '../../../components/BreadcrumbButton';
 import LoadingIndicator from '../../../components/LoadingIndicator';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDownloadFile } from '../../../hooks/useDownloadFile';
+import { CLOUDINARY_URL } from '../../../utils/cloudinary';
 
 const HomeScreen = ({ navigation, route }) => {
     const { branch, type_cars } = route.params;
@@ -21,6 +22,8 @@ const HomeScreen = ({ navigation, route }) => {
     const filteredFiles = selectedFilter === 0
         ? files
         : files.filter((folder: any) => folder.icon.id === selectedFilter);
+
+
 
     useFocusEffect(
         React.useCallback(() => {
@@ -71,17 +74,19 @@ const HomeScreen = ({ navigation, route }) => {
         {
             label: 'หน้าแรก',
             onPress: () => navigation.goBack(),
-            icon: <AntDesign name="home" size={18} color={color.blue[600]} />,
+            icon: <MaterialCommunityIcons name="folder-home" size={18} color={color.blue[600]} />,
         },
         branch?.branch_name && {
             label: branch.branch_name,
             onPress: () => navigation.goBack(),
+            icon: <MaterialCommunityIcons name="folder-home" size={18} color={color.blue[600]} />,
         },
         type_cars?.car_type_name && {
             label: type_cars.car_type_name,
             onPress: () => { },
             style: { backgroundColor: color.blue[600] },
             textStyle: { color: color.white },
+            icon: <MaterialCommunityIcons name="file" size={18} color={color.white} />,
         },
     ].filter(Boolean);
 
@@ -95,7 +100,7 @@ const HomeScreen = ({ navigation, route }) => {
     const nonPdfFiles = filteredFiles.filter(item => !item.filename.toLowerCase().endsWith('.pdf'));
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
             <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <View style={{ height: 40 }}>
@@ -152,10 +157,10 @@ const HomeScreen = ({ navigation, route }) => {
                                                     }
                                                 }}
                                                 style={styles.listItemContent}>
-                                                {/* @ts-ignore */}
+
                                                 {item?.storage_provider === "cloudinary" ? (
                                                     <Image
-                                                        source={{ uri: `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` }}
+                                                        source={{ uri: `${CLOUDINARY_URL}${item?.file_id}.${item?.filename.split('.').pop()}` }}
                                                         style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }}
                                                     />
                                                 ) : (
@@ -241,7 +246,7 @@ const HomeScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </View>
             </Modal>
-        </View>
+        </SafeAreaView>
     )
 }
 

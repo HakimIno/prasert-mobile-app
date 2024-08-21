@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { CLOUDINARY_URL, GOOGLE_CLOUD_DOWNLOAD_URL } from '../utils/cloudinary';
 
 export const useDownloadFile = () => {
     const { session } = useAuth();
@@ -20,9 +21,9 @@ export const useDownloadFile = () => {
 
             let apiEndpoint: string;
             if (storageProvider === 'cloudinary') {
-                apiEndpoint = `https://res.cloudinary.com/dkm0oeset/image/upload/${fileId}`;
+                apiEndpoint = `${CLOUDINARY_URL}${fileId}`;
             } else if (storageProvider === 'google_drive') {
-                apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileId}`;
+                apiEndpoint = `${GOOGLE_CLOUD_DOWNLOAD_URL}?fileId=${fileId}`;
             } else {
                 throw new Error('Unsupported storage provider');
             }

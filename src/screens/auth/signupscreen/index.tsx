@@ -1,9 +1,10 @@
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View, Linking, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View, Linking, KeyboardAvoidingView, Platform, ScrollView, useWindowDimensions, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { supabase } from '../../../utils/supabase';
 import color from '../../../constant/color';
 
 const SignupScreen = () => {
+    const { width, height } = useWindowDimensions(); // ใช้ useWindowDimensions เพื่อดึงขนาดหน้าจอ
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -79,12 +80,11 @@ const SignupScreen = () => {
         }
     };
 
-
     const renderInput = (label: string, name: string, placeholder: string, secureTextEntry = false, keyboardType: 'default' | 'email-address' = 'default') => (
-        <View>
-            <Text style={styles.label}>{label}:</Text>
+        <View style={{ marginBottom: height * 0.02 }}>
+            <Text style={[styles.label, { fontSize: width * 0.04 }]}>{label}:</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { padding: height * 0.02 }]}
                 placeholder={placeholder}
                 placeholderTextColor={'#a1a1aa'}
                 value={formData[name]}
@@ -97,13 +97,13 @@ const SignupScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                    <View style={{ margin: 20 }}>
+                    <View style={{ margin: width * 0.05 }}>
                         <View style={styles.formContainer}>
                             {renderInput('ชื่อ', 'firstName', 'First Name')}
                             {renderInput('นามสกุล', 'lastName', 'Last Name')}
@@ -111,18 +111,18 @@ const SignupScreen = () => {
                             {renderInput('เบอร์โทรศัพท์', 'phone', 'Phone Number')}
                             {renderInput('รหัสผ่าน', 'password', 'Password', true)}
 
-                            <Pressable style={styles.btnContainer} onPress={handleSignUp} disabled={loading}>
+                            <Pressable style={[styles.btnContainer, { height: height * 0.07 }]} onPress={handleSignUp} disabled={loading}>
                                 {loading ? (
                                     <ActivityIndicator size="small" color={color.white} />
                                 ) : (
-                                    <Text style={styles.btnText}>ลงทะเบียน</Text>
+                                    <Text style={[styles.btnText, { fontSize: width * 0.045 }]}>ลงทะเบียน</Text>
                                 )}
                             </Pressable>
                         </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -143,8 +143,6 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     input: {
-        marginBottom: 20,
-        padding: 15,
         textAlignVertical: 'center',
         backgroundColor: color.white,
         borderRadius: 20,
@@ -154,7 +152,6 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: color.blue[500],
         backgroundColor: color.blue[500],
-        height: 55,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,

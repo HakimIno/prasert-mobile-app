@@ -10,7 +10,6 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
     const { top } = useSafeAreaInsets();
     const [isMenuVisible, setMenuVisible] = useState(false);
     const { user, signOut } = useAuth(); // ใช้ข้อมูลจาก AuthContext
-    const buttonRef = useRef<View>(null); // สร้าง ref สำหรับปุ่ม 'b'
 
     const handleLogout = async () => {
         await signOut();
@@ -23,7 +22,7 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
 
     return (
         <View style={[styles.header]}>
-            <View style={[{ marginTop: Platform.OS === "ios" ? top - 5 : top + 5 }, styles.subHeader]}>
+            <View style={[{ marginTop: Platform.OS === "ios" ? 0 : top + 5 }, styles.subHeader]}>
                 {isShow && (
                     <TextInput
                         style={styles.searchInput}
@@ -35,8 +34,6 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
                 )}
                 <View />
                 <TouchableOpacity
-                    //@ts-ignore
-                    ref={buttonRef}
                     style={[styles.icon, { backgroundColor: color.blue[600] }]}
                     onPress={showMenu}
                 >

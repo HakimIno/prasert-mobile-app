@@ -1,16 +1,16 @@
-import { ActivityIndicator, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, Modal, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useMemo, useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { FlashList } from '@shopify/flash-list'
 import color from '../../../constant/color'
 import { useFetchTypeCar } from '../../../hooks/useFetchTypeCar'
 import CustomHeader from '../../../navigation/CustomHeader'
-import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useFiles } from '../../../context/FilesComtext'
 import LoadingIndicator from '../../../components/LoadingIndicator'
-import { useFocusEffect } from '@react-navigation/native'
 import dayjs from 'dayjs'
 import { useDownloadFile } from '../../../hooks/useDownloadFile'
+import { CLOUDINARY_URL } from '../../../utils/cloudinary'
 
 const TypeCarsScreen = ({ navigation, route }) => {
     const { branch } = route.params;
@@ -133,20 +133,21 @@ const TypeCarsScreen = ({ navigation, route }) => {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto" backgroundColor='white' />
             <CustomHeader isShow searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <View style={{ marginHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
                 <Pressable
                     onPress={() => navigation.goBack()}
                     style={[styles.button, styles.firstButton, { gap: 2 }]}>
-                    <AntDesign name="home" size={18} color={color.blue[600]} />
+                    <MaterialCommunityIcons name="folder-home" size={18} color={color.blue[600]} />
                     <Text style={styles.buttonText}>หน้าแรก</Text>
                 </Pressable>
                 <Ionicons name="chevron-forward" size={16} color={color.blue[600]} />
                 <Pressable
                     onPress={() => { }}
-                    style={[styles.button, { backgroundColor: color.blue[600] }]}>
+                    style={[styles.button, { backgroundColor: color.blue[600], gap: 2 }]}>
+                    <MaterialCommunityIcons name="folder" size={18} color={color.white} />
                     <Text style={[styles.buttonText, { color: color.white }]}>{branch?.branch_name}</Text>
                 </Pressable>
             </View>
@@ -210,7 +211,7 @@ const TypeCarsScreen = ({ navigation, route }) => {
                 </View>
             </Modal>
 
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -223,7 +224,7 @@ const FileListItem = ({ item, handlePress, handleOpenMenu }) => (
                 <Image
                     source={{
                         uri: item?.storage_provider === "cloudinary" ?
-                            `https://res.cloudinary.com/dkm0oeset/image/upload/${item?.file_id}.${item?.filename.split('.').pop()}` :
+                            `${CLOUDINARY_URL}${item?.file_id}.${item?.filename.split('.').pop()}` :
                             item.icon.icon_url
                     }}
                     style={{ width: 50, height: 50, resizeMode: 'cover', borderWidth: 0.5, borderColor: color.gray[300], borderRadius: 5 }}
@@ -281,8 +282,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     listItemIcon: {
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
     },
     button: {
         flexDirection: 'row',

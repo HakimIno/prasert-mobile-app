@@ -1,6 +1,6 @@
 import React from 'react';
-import { ScrollView, Pressable, Text, StyleSheet, View } from 'react-native';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import color from '../constant/color';
 
 const BreadcrumbButton = ({ onPress, children, icon, style, textStyle }) => (
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
         backgroundColor: color.blue[50],
         borderRadius: 20,
         marginRight: 10,
+        gap: 2
     },
     firstButton: {
         marginRight: 0,

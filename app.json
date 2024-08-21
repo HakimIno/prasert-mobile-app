@@ -33,7 +33,9 @@
     "extra": {
       "eas": {
         "projectId": "500f1a50-0248-4356-a617-5d9117617500"
-      }
+      },
+      "cloudinaryUrl": "https://res.cloudinary.com/dkm0oeset/image/upload/",
+      "googleCloudDownloadUrl": "https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download"
     },
     "owner": "kimsnow33"
   }

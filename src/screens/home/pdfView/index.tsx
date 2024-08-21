@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, View, ActivityIndicator, Alert, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Dimensions, View, ActivityIndicator, Alert, Text, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import Pdf from 'react-native-pdf';
 import * as FileSystem from 'expo-file-system';
 import { useAuth } from '../../../context/AuthContext';
@@ -8,6 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { usePDF } from '../../../context/PDFContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GOOGLE_CLOUD_DOWNLOAD_URL } from '../../../utils/cloudinary';
 
 const PDFView = ({ navigation, route }) => {
     const { fileId, fileName, storageProvider } = route.params;
@@ -62,7 +63,7 @@ const PDFView = ({ navigation, route }) => {
                 return;
             }
 
-            const apiEndpoint = `https://prasert-upload-to-dive.prasertjarernyonte.workers.dev/download?fileId=${fileIdx}`;
+            const apiEndpoint = `${GOOGLE_CLOUD_DOWNLOAD_URL}?fileId=${fileIdx}`;
             const fileUri = FileSystem.documentDirectory + file_name;
 
             const response = await FileSystem.downloadAsync(apiEndpoint, fileUri, {
@@ -96,11 +97,12 @@ const PDFView = ({ navigation, route }) => {
     const { top } = useSafeAreaInsets();
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Header */}
-            <View style={[styles.header, { marginTop: top }]}>
+            <View style={[styles.header, { marginTop: Platform.OS === "ios" ? 0 : top }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={26} color={color.black} />
+                    <Ionicons name={Platform.OS === "ios" ? "chevron-back" : "arrow-back"} size={26} color={color.black} />
+
                 </TouchableOpacity>
                 <Text style={styles.fileName} numberOfLines={1}>{fileName}</Text>
             </View>
@@ -125,7 +127,7 @@ const PDFView = ({ navigation, route }) => {
                     />
                 )
             )}
-        </View>
+        </SafeAreaView>
     );
 };
 
