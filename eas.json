@@ -21,7 +21,11 @@
       },
       "ios": {
         "buildConfiguration": "Release",
-        "enterpriseProvisioning": "universal"
+        "enterpriseProvisioning": "universal",
+        "buildArtifactPaths": ["ios/build/*"],
+        "autoIncrement": true,
+        "distribution": "store",
+        "releaseChannel": "production"
       }
     }
   },
