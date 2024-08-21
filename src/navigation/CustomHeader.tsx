@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import color from '../constant/color';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import useResponsiveStyles from '../hooks/useResponsiveStyles';
 
 
 const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undefined }) => {
@@ -19,6 +20,8 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
     const showMenu = () => {
         setMenuVisible(true);
     };
+
+    const { modalWidth, top: topModal, left: leftModal } = useResponsiveStyles()
 
     return (
         <View style={[styles.header]}>
@@ -51,7 +54,7 @@ const CustomHeader = ({ isShow = false, searchQuery = '', setSearchQuery = undef
                 statusBarTranslucent
             >
                 <TouchableOpacity style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
-                    <View style={[styles.menuContainer, { top: "10%", right: "10%" }]}>
+                    <View style={[styles.menuContainer, { top: topModal, right: leftModal, width: modalWidth }]}>
                         <View style={[styles.menuItem, { flexDirection: 'row', gap: 10, alignItems: 'center' }]}>
                             <Ionicons name="person" size={20} color={color.gray[800]} />
                             <Text numberOfLines={1} style={{ fontFamily: 'SukhumvitSet-Bold' }}>{user?.email}</Text>
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         alignItems: 'center',
-        width: "60%"
+
     },
     menuItem: {
         flex: 1,

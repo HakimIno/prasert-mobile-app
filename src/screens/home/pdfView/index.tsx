@@ -73,6 +73,8 @@ const PDFView = ({ navigation, route }) => {
                 },
             });
 
+            console.log("response", response);
+
             if (!response.uri) {
                 throw new Error(`Failed to download file: ${response.status}`);
             }
@@ -138,6 +140,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: color.white,
         padding: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     header: {
         flexDirection: 'row',

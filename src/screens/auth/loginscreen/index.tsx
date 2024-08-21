@@ -1,43 +1,55 @@
-import { ActivityIndicator, Alert, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import React, { useState } from 'react'
 import color from '../../../constant/color';
 import { useAuth } from '../../../context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
+import useResponsiveStyles from '../../../hooks/useResponsiveStyles';
 
 const LoginScreen = ({ navigation }) => {
-    const { width, height } = useWindowDimensions(); // ใช้ useWindowDimensions
     const { signIn } = useAuth();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleSignIn = async () => {
-        setLoading(true);
+        setLoading(true); // เริ่มการโหลด
         try {
             await signIn(email, password);
         } catch (error) {
             Alert.alert('Error', (error as Error).message);
         } finally {
-            setLoading(false);
+            setLoading(false); // จบการโหลด
         }
     };
+
+    const {
+        inputWidth,
+        space,
+        imageWidth,
+        imageHeight,
+        fontSize,
+        size,
+        padding,
+        fontSizeBtn,
+        heightBtn,
+    } = useResponsiveStyles()
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style="auto" />
-            <View style={[styles.container, { marginHorizontal: width * 0.05, flex: 1, justifyContent: 'center', alignItems: 'center', gap: height * 0.05 }]}>
+            <View style={[styles.container, { marginHorizontal: space, flex: 1, justifyContent: 'center', alignItems: 'center', gap: space }]}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Image
                         source={require("../../../../assets/logo.jpg")}
-                        style={{ width: width * 0.3, height: width * 0.3, borderRadius: width * 0.3, marginBottom: height * 0.02 }}
+                        style={{ width: imageWidth, height: imageHeight, borderRadius: imageWidth, marginBottom: space, }}
                     />
 
-                    <Text style={{ fontFamily: 'SukhumvitSet-Bold', fontSize: width * 0.05 }}>ประเสริฐเจริญยนต์</Text>
+                    <Text style={{ fontFamily: 'SukhumvitSet-Bold', fontSize: fontSize }}>ประเสริฐเจริญยนต์</Text>
                 </View>
 
-                <View style={{ width: "100%", gap: height * 0.005 }}>
+                <View style={{ width: "100%", gap: 3, justifyContent: 'center', alignItems: 'center' }}>
                     <TextInput
-                        style={[styles.input, { padding: height * 0.02 }]}
+                        style={[styles.input, { width: inputWidth, height: heightBtn, fontSize: fontSize, paddingHorizontal: 20 }]}
                         placeholder='Email'
                         autoComplete="email"
                         placeholderTextColor={'#a1a1aa'}
@@ -48,7 +60,7 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <TextInput
-                        style={[styles.input, { padding: height * 0.02 }]}
+                        style={[styles.input, { width: inputWidth, height: heightBtn, fontSize: fontSize, paddingHorizontal: 20 }]}
                         placeholder='Password'
                         secureTextEntry
                         placeholderTextColor={'#a1a1aa'}
@@ -57,21 +69,21 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <Pressable
-                        style={[styles.btnContainer, { height: height * 0.07 }]}
+                        style={[styles.btnContainer, { width: inputWidth, height: heightBtn }]}
                         onPress={handleSignIn}
-                        disabled={loading}
+                        disabled={loading} // ปิดการใช้งานปุ่มเมื่อกำลังโหลด
                     >
                         {loading ? (
-                            <ActivityIndicator color={color.white} />
+                            <ActivityIndicator color={color.white} size={24} />
                         ) : (
-                            <Text style={[styles.textInfoSubTitle, { color: color.white, fontFamily: 'SukhumvitSet-Bold', fontSize: width * 0.045 }]}>เข้าสู่ระบบ</Text>
+                            <Text style={[styles.textInfoSubTitle, { fontSize: fontSizeBtn * size, color: color.white, fontFamily: 'SukhumvitSet-Bold' }]}>เข้าสู่ระบบ</Text>
                         )}
                     </Pressable>
 
-                    <View style={{ flexDirection: 'row', gap: height * 0.01, justifyContent: 'center', alignItems: 'center', marginTop: height * 0.03 }}>
-                        <Text style={[styles.textInfoSubTitle, { color: color.black, fontFamily: 'SukhumvitSet-Medium', fontSize: width * 0.04 }]}>หากยังไม่มีบัญชีโปรด</Text>
+                    <View style={{ flexDirection: 'row', gap: 3, justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
+                        <Text style={[styles.textInfoSubTitle, { color: color.black, fontFamily: 'SukhumvitSet-Medium' }]}>หากยังไม่มีบัญชีโปรด</Text>
                         <Pressable onPress={() => navigation.navigate("SignUp")}>
-                            <Text style={[styles.textInfoSubTitle, { color: color.blue[600], fontFamily: 'SukhumvitSet-Bold', textDecorationLine: 'underline', fontSize: width * 0.04 }]}>
+                            <Text style={[styles.textInfoSubTitle, { color: color.blue[600], fontFamily: 'SukhumvitSet-Bold', textDecorationLine: 'underline' }]}>
                                 ลงทะเบียน
                             </Text>
                         </Pressable>
@@ -90,7 +102,7 @@ const styles = StyleSheet.create({
         backgroundColor: color.slate[100]
     },
     textInfoSubTitle: {
-        lineHeight: 20 * 1.5 // สามารถใช้ useWindowDimensions เพื่อปรับขนาดตามหน้าจอได้
+        lineHeight: 20 * 1.5
     },
     input: {
         marginBottom: 20,
@@ -108,4 +120,4 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginTop: 10
     },
-});
+})

@@ -66,6 +66,7 @@ const AppNavigator = () => {
                                 headerTitle: "ลงทะเบียน",
                                 headerTitleStyle: {
                                     fontFamily: 'SukhumvitSet-SemiBold',
+                                    fontSize: 18
                                 }
                             }}
                         />

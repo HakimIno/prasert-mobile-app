@@ -2,6 +2,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View,
 import React, { useState } from 'react';
 import { supabase } from '../../../utils/supabase';
 import color from '../../../constant/color';
+import useResponsiveStyles from '../../../hooks/useResponsiveStyles';
 
 const SignupScreen = () => {
     const { width, height } = useWindowDimensions(); // ใช้ useWindowDimensions เพื่อดึงขนาดหน้าจอ
@@ -26,6 +27,14 @@ const SignupScreen = () => {
     const handleSignUp = async () => {
         setLoading(true);
         const { email, password, firstName, lastName, phone } = formData;
+
+        // ตรวจสอบความถูกต้องของข้อมูลก่อน
+        if (!email || !password || !firstName || !lastName || !phone) {
+            Alert.alert('Error', 'Please fill in all fields.');
+            setLoading(false);
+            return;
+        }
+
         try {
             const { data, error } = await signUp(email, password);
 
@@ -34,6 +43,13 @@ const SignupScreen = () => {
             }
 
             const user = data?.user;
+
+            // เพิ่มการตรวจสอบว่าผู้ใช้ได้รับการยืนยันอีเมลแล้วหรือไม่
+            if (user && !user.confirmed_at) {
+                Alert.alert('Error', 'Please verify your email address before logging in.');
+                setLoading(false);
+                return;
+            }
 
             const { error: insertError } = await supabase
                 .from('users')
@@ -60,7 +76,7 @@ const SignupScreen = () => {
                     },
                     {
                         text: 'OK',
-                        onPress: () => console.log('OK Pressed'),
+                        onPress: () => { },
                     },
                 ]
             );
@@ -80,11 +96,20 @@ const SignupScreen = () => {
         }
     };
 
+
+    const {
+        inputWidth,
+        fontSize,
+        size,
+        fontSizeBtn,
+        heightBtn,
+    } = useResponsiveStyles()
+
     const renderInput = (label: string, name: string, placeholder: string, secureTextEntry = false, keyboardType: 'default' | 'email-address' = 'default') => (
         <View style={{ marginBottom: height * 0.02 }}>
-            <Text style={[styles.label, { fontSize: width * 0.04 }]}>{label}:</Text>
+            <Text style={[styles.label, { fontSize: fontSize }]}>{label}:</Text>
             <TextInput
-                style={[styles.input, { padding: height * 0.02 }]}
+                style={[styles.input, { width: inputWidth, height: heightBtn, fontSize: fontSize, paddingHorizontal: 20 }]}
                 placeholder={placeholder}
                 placeholderTextColor={'#a1a1aa'}
                 value={formData[name]}
@@ -111,11 +136,13 @@ const SignupScreen = () => {
                             {renderInput('เบอร์โทรศัพท์', 'phone', 'Phone Number')}
                             {renderInput('รหัสผ่าน', 'password', 'Password', true)}
 
-                            <Pressable style={[styles.btnContainer, { height: height * 0.07 }]} onPress={handleSignUp} disabled={loading}>
+                            <Pressable style={[styles.btnContainer, { width: inputWidth, height: heightBtn }]}
+                                onPress={handleSignUp}
+                                disabled={loading}>
                                 {loading ? (
-                                    <ActivityIndicator size="small" color={color.white} />
+                                    <ActivityIndicator color={color.white} size={24} />
                                 ) : (
-                                    <Text style={[styles.btnText, { fontSize: width * 0.045 }]}>ลงทะเบียน</Text>
+                                    <Text style={[styles.btnText, { fontSize: fontSizeBtn * size, color: color.white, fontFamily: 'SukhumvitSet-Bold' }]}>ลงทะเบียน</Text>
                                 )}
                             </Pressable>
                         </View>
@@ -136,6 +163,8 @@ const styles = StyleSheet.create({
     formContainer: {
         width: "100%",
         gap: 3,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     label: {
         color: color.black,
