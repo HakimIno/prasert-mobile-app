@@ -1,10 +1,11 @@
 import 'dotenv/config';
+import { version } from './package.json';
 
 export default ({ config }) => ({
   ...config,
   name: "ประเสริฐเจริญยนต์",
   slug: "prasert-mobile-app",
-  version: "2.2.1",
+  version,
   orientation: "portrait",
   icon: "./assets/appLogo.png",
   userInterfaceStyle: "light",
