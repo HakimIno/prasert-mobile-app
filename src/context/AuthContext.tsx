@@ -5,7 +5,7 @@ import { supabase } from '../utils/supabase';
 interface AuthContextProps {
     session: Session | null;
     user: User | null;
-    isLoading: boolean; // เพิ่ม isLoading เพื่อจัดการสถานะการโหลด
+    isLoading: boolean;
     signUp: (email: string, password: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
@@ -16,14 +16,20 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // สถานะการโหลด
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-            setUser(session?.user || null);
-            setIsLoading(false); // การโหลดเสร็จสิ้น
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                setSession(session);
+                setUser(session?.user || null);
+            } catch (error) {
+                alert('Failed to check session. Please try again later.');
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         checkSession();
@@ -31,7 +37,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user || null);
-            setIsLoading(false); // การโหลดเสร็จสิ้น
+            setIsLoading(false);
         });
 
         return () => {
@@ -40,20 +46,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const signUp = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
+        try {
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+            alert('Sign up successful! Please check your email for verification.');
+        } catch (error) {
+            console.error('Error signing up:', error);
+            alert('Failed to sign up. Please try again.');
+        }
     };
 
     const signIn = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        try {
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+        } catch (error) {
+            alert('Failed to sign in. Please check your credentials and try again.');
+        }
     };
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        setSession(null);
-        setUser(null);
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+            setSession(null);
+            setUser(null);
+            alert('You have been signed out.');
+        } catch (error) {
+            alert('Failed to sign out. Please try again.');
+        }
     };
 
     return (

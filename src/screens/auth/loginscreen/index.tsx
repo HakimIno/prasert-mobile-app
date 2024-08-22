@@ -12,6 +12,11 @@ const LoginScreen = ({ navigation }) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleSignIn = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please enter both email and password.');
+            return;
+        }
+
         setLoading(true); // เริ่มการโหลด
         try {
             await signIn(email, password);
@@ -21,6 +26,7 @@ const LoginScreen = ({ navigation }) => {
             setLoading(false); // จบการโหลด
         }
     };
+
 
     const {
         inputWidth,
