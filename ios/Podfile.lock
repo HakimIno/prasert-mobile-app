@@ -1,27 +1,23 @@
 PODS:
   - boost (1.83.0)
   - DoubleConversion (1.1.6)
-  - EXApplication (5.9.1):
-    - ExpoModulesCore
   - EXConstants (16.0.2):
     - ExpoModulesCore
   - EXJSONUtils (0.13.1)
   - EXManifests (0.14.3):
     - ExpoModulesCore
-  - EXNotifications (0.28.15):
+  - Expo (51.0.30):
     - ExpoModulesCore
-  - Expo (51.0.28):
-    - ExpoModulesCore
-  - expo-dev-client (4.0.23):
+  - expo-dev-client (4.0.24):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (4.0.25):
+  - expo-dev-launcher (4.0.26):
     - DoubleConversion
     - EXManifests
-    - expo-dev-launcher/Main (= 4.0.25)
+    - expo-dev-launcher/Main (= 4.0.26)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -47,7 +43,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Main (4.0.25):
+  - expo-dev-launcher/Main (4.0.26):
     - DoubleConversion
     - EXManifests
     - expo-dev-launcher/Unsafe
@@ -76,7 +72,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Unsafe (4.0.25):
+  - expo-dev-launcher/Unsafe (4.0.26):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu
@@ -104,10 +100,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu (5.0.19):
+  - expo-dev-menu (5.0.20):
     - DoubleConversion
-    - expo-dev-menu/Main (= 5.0.19)
-    - expo-dev-menu/ReactNativeCompatibles (= 5.0.19)
+    - expo-dev-menu/Main (= 5.0.20)
+    - expo-dev-menu/ReactNativeCompatibles (= 5.0.20)
     - glog
     - hermes-engine
     - RCT-Folly (= 2024.01.01.00)
@@ -128,7 +124,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - expo-dev-menu-interface (1.8.3)
-  - expo-dev-menu/Main (5.0.19):
+  - expo-dev-menu/Main (5.0.20):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu-interface
@@ -154,7 +150,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/ReactNativeCompatibles (5.0.19):
+  - expo-dev-menu/ReactNativeCompatibles (5.0.20):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -175,7 +171,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/SafeAreaView (5.0.19):
+  - expo-dev-menu/SafeAreaView (5.0.20):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -197,7 +193,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/Vendored (5.0.19):
+  - expo-dev-menu/Vendored (5.0.20):
     - DoubleConversion
     - expo-dev-menu/SafeAreaView
     - glog
@@ -230,7 +226,7 @@ PODS:
   - ExpoMediaLibrary (16.0.4):
     - ExpoModulesCore
     - React-Core
-  - ExpoModulesCore (1.12.21):
+  - ExpoModulesCore (1.12.22):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1502,11 +1498,9 @@ PODS:
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
-  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - expo-dev-client (from `../node_modules/expo-dev-client/ios`)
   - expo-dev-launcher (from `../node_modules/expo-dev-launcher`)
@@ -1593,16 +1587,12 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  EXApplication:
-    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXJSONUtils:
     :path: "../node_modules/expo-json-utils/ios"
   EXManifests:
     :path: "../node_modules/expo-manifests/ios"
-  EXNotifications:
-    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   expo-dev-client:
@@ -1756,22 +1746,20 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
-  EXApplication: c08200c34daca7af7fd76ac4b9d606077410e8ad
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
   EXJSONUtils: 30c17fd9cc364d722c0946a550dfbf1be92ef6a4
   EXManifests: c1fab4c3237675e7b0299ea8df0bcb14baca4f42
-  EXNotifications: 7d691d3688bd055afd9de36fdf2cffc4d8be3b24
-  Expo: a9897504e76db42c472778bc1eeef7895092f3fe
-  expo-dev-client: 924e474dc9eccf507260a22c5a8301bed0497453
-  expo-dev-launcher: 684b06adeedbe07f3efacf5d6138642cda51681d
-  expo-dev-menu: 68603f71158ca447abb567e302b492b743cdd8a2
+  Expo: 61b2953ad6afa979729f639c5992c182e8eb9040
+  expo-dev-client: 44e9bb8afbf444bc380c606475030fe8929de203
+  expo-dev-launcher: 34da84397348512e8080bb74bb3517eb53606dc9
+  expo-dev-menu: a54fc1d8294172cb90b07ad0c4ba674058cc5cab
   expo-dev-menu-interface: be32c09f1e03833050f0ee290dcc86b3ad0e73e4
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: e7f2275c10ca8573c991e007329ad6bf98086485
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
   ExpoMediaLibrary: 250bf2659264163e428da5f867493b4cccd35ef9
-  ExpoModulesCore: ae1a4244021797374769ef44499fc4313d2ac676
+  ExpoModulesCore: 3d713ef226952c6a4a36a0f4501a328baba84a90
   ExpoSharing: 8db05dd85081219f75989a3db2c92fe5e9741033
   ExpoSystemUI: d4f065a016cae6721b324eb659cdee4d4cf0cb26
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24
