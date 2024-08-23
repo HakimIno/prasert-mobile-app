@@ -29,7 +29,7 @@ const SignupScreen = () => {
         const { email, password, firstName, lastName, phone } = formData;
 
         // ตรวจสอบความถูกต้องของข้อมูลก่อน
-        if (!email || !password || !firstName || !lastName || !phone) {
+        if (!email || !password || !firstName || !lastName) {
             Alert.alert('Error', 'Please fill in all fields.');
             setLoading(false);
             return;
