@@ -1,6 +1,6 @@
 {
   "name": "prasertjarernyonte",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
