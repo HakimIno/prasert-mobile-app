@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import { SafeAreaView, Text, View } from 'react-native';
 import { FilesProvider } from './src/context/FilesComtext';
 import { PDFProvider } from './src/context/PDFContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -26,9 +27,9 @@ export default function App() {
     <AuthProvider>
       <FilesProvider>
         <PDFProvider>
-
-          <AppStackNavigation />
-
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <AppStackNavigation />
+          </GestureHandlerRootView>
         </PDFProvider>
       </FilesProvider>
     </AuthProvider>

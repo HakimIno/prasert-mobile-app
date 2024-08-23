@@ -3,6 +3,7 @@ import { View, Image, Text, StyleSheet, FlatList, Platform, Pressable, SafeAreaV
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { CLOUDINARY_URL } from '../../../utils/cloudinary';
+import ZoomableImage from '../../../components/ZoomableImage';
 
 const ImageView = ({ route, navigation }) => {
     const { items, initialIndex } = route.params;
@@ -11,14 +12,7 @@ const ImageView = ({ route, navigation }) => {
 
     const renderItem = ({ item }) => (
         <View style={[styles.imageContainer, { width }]}>
-            <Image
-                source={{
-                    uri: item?.storage_provider === "cloudinary" ?
-                        `${CLOUDINARY_URL}${item?.file_id}.${item?.filename.split('.').pop()}` :
-                        item.icon?.icon_url
-                }}
-                style={[styles.image, { width: width * 0.9, height: height * 0.6 }]} // ปรับขนาดตามหน้าจอ
-            />
+            <ZoomableImage imageUri={item?.storage_provider === "cloudinary" ? `${CLOUDINARY_URL}${item?.file_id}.${item?.filename.split('.').pop()}` : item.icon?.icon_url} />
             <View style={styles.textContainer}>
                 <Text style={styles.text} numberOfLines={1}>{item.filename}</Text>
             </View>
@@ -31,6 +25,7 @@ const ImageView = ({ route, navigation }) => {
         }
     };
 
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style='light' />
@@ -40,6 +35,7 @@ const ImageView = ({ route, navigation }) => {
             >
                 <Ionicons name="close" size={30} color="white" />
             </Pressable>
+
             <FlatList
                 data={items}
                 renderItem={renderItem}
@@ -54,7 +50,6 @@ const ImageView = ({ route, navigation }) => {
                 )}
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-                overScrollMode="never"
             />
             <View style={[styles.positionIndicator, { top: Platform.OS === "ios" ? height * 0.07 : height * 0.06, right: Platform.OS === "ios" ? width * 0.07 : width * 0.06 }]}>
                 <Text style={styles.positionText}>
